@@ -22,20 +22,9 @@ has '_proxy' => (
     is => 'rw'
 );
 
-# sub BUILD {
-#     my ($self) = @_;
-# 
-#     my $class = Class::MOP::Class->create('Data::Verifier::'.$self->name.'::Proxy');
-#     foreach my $field (keys(%{ $self->profile })) {
-#         $class->add_attribute($field => ( is => 'rw', accessor => $field ));
-#     }
-#     $self->_proxy($class->new_object);
-# }
-
 sub verify {
     my ($self, $params) = @_;
 
-    # my $proxy = $self->_proxy;
     my $results = Data::Verifier::Results->new;
     my $profile = $self->profile;
 
