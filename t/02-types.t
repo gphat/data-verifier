@@ -5,7 +5,6 @@ use Data::Verifier;
 
 {
     my $verifier = Data::Verifier->new(
-        name => 'some_form',
         profile => {
             age    => {
                 type => 'Int'

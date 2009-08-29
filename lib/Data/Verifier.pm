@@ -6,12 +6,6 @@ our $VERSION = '0.01';
 use Data::Verifier::Results;
 use Moose::Util::TypeConstraints;
 
-has 'name' => (
-    is => 'ro',
-    isa => 'Str',
-    required => 1
-);
-
 has 'profile' => (
     is => 'ro',
     isa => 'HashRef',
