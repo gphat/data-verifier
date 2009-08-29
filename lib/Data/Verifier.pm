@@ -3,6 +3,7 @@ use Moose;
 
 our $VERSION = '0.01';
 
+use Data::Verifier::Filters;
 use Data::Verifier::Results;
 use Moose::Util::TypeConstraints;
 
@@ -10,10 +11,6 @@ has 'profile' => (
     is => 'ro',
     isa => 'HashRef',
     required => 1
-);
-
-has '_proxy' => (
-    is => 'rw'
 );
 
 sub verify {
@@ -28,7 +25,10 @@ sub verify {
         my $fprof = $profile->{$key};
 
         my $val = $params->{$key};
-        # XX Need to filter here
+
+        if($fprof->{filters}) {
+            $val = $self->_filter_value($fprof->{filters}, $val);
+        }
 
         # If the param is required, verify that it's there
         if($fprof->{required}) {
@@ -49,6 +49,21 @@ sub verify {
     return $results;
 }
 
+sub _filter_value {
+    my ($self, $filters, $value) = @_;
+    if(!ref($filters)) {
+        $filters = [ $filters ];
+    }
+
+    foreach my $f (@{ $filters }) {
+        if(Data::Verifier::Filters->can($f)) {
+            $value = Data::Verifier::Filters->$f($value);
+        }
+    }
+
+    return $value;
+}
+
 sub _validate_value {
     my ($self, $type, $value) = @_;
 
@@ -66,23 +81,62 @@ __END__
 
 =head1 NAME
 
-Data::Verifier - The great new Data::Verifier!
+Data::Verifier - Profile based data verification with Moose type constraints.
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
+Data::Verifier allows you verify data (such as web forms, which was the
+original idea) by leveraging the power of Moose's type constraint system.
 
     use Data::Verifier;
 
-    my $foo = Data::Verifier->new(profile => {
-        param1  => {
+    my $dv = Data::Verifier->new(profile => {
+        name => {
             required    => 1,
-            type        => 'Some::Moose::Type';
+            type        => 'Str',
+            filters     => [ qw(collapse trim) ]
+        }
+        age  => {
+            type        => 'Int';
+        },
+        sign => {
+            required    => 1,
+            type        => 'Str'
         }
     });
-    ...
+
+    my $results = $dv->verify({
+        name => 'Cory', age => 'foobar'
+    });
+
+    $results->success; # no
+
+    $results->is_invalid('name'); # no
+    $results->is_invalid('age'); # yes
+
+    $results->is_missing('name'); # no
+    $results->is_missing('sign'); # yes
+
+=head1 PROFILE
+
+The profile is a hashref.  Each value you'd like to verify is a key.  The
+values specify all the options to use with the field.  The available options
+are:
+
+=head2 filters
+
+An optional list of filters through which the value will be run.  See the
+documentation for L<Data::Verifier::Filters> to learn more.  This value
+may be either a string or an arrayref of strings.
+
+=head2 required
+
+Determines if this field is required for verification.
+
+=head2 type
+
+The name of the Moose type constraint to use with verifying this field's
+value.
 
 =head1 AUTHOR
 
