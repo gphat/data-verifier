@@ -18,6 +18,7 @@ use Data::Verifier;
     ok($results->success, 'success');
     cmp_ok($results->invalid_count, '==', 0, 'none invalid');
     cmp_ok($results->missing_count, '==', 0, 'none missing');
+    cmp_ok($results->get_value('name'), 'eq', 'foo', 'get_value');
 }
 
 {
