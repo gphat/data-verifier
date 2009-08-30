@@ -42,6 +42,11 @@ sub verify {
             $val = $self->_filter_value($fprof->{filters}, $val);
         }
 
+        # Empty strings are undefined
+        if($val eq '') {
+            $val = undef;
+        }
+
         # If the param is required, verify that it's there
         if($fprof->{required}) {
             $results->set_missing($key, 1) unless defined($params->{$key});
@@ -51,7 +56,7 @@ sub verify {
         $results->set_value($key, $val);
 
         # Validate it
-        if($fprof->{type}) {
+        if(defined($val) && $fprof->{type}) {
             my $cons = Moose::Util::TypeConstraints::find_type_constraint($fprof->{type});
             die "Unknown type constraint '$cons'" unless defined($cons);
 
