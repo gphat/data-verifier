@@ -40,9 +40,14 @@ sub verify {
 
         # Validate it
         if($fprof->{type}) {
-            unless($self->_validate_value($fprof->{type}, $params->{$key})) {
-                $results->set_invalid($key, 1);
-            }
+            my $cons = Moose::Util::TypeConstraints::find_type_constraint($fprof->{type});
+            die "Unknown type constraint '$cons'" unless defined($cons);
+
+            # if($fprof->{coerce}) {
+            #     $val = $cons->coerce($val);
+            # }
+
+            $results->set_invalid($key, 1) unless $cons->check($val);
         }
     }
 
@@ -62,15 +67,6 @@ sub _filter_value {
     }
 
     return $value;
-}
-
-sub _validate_value {
-    my ($self, $type, $value) = @_;
-
-    my $cons = Moose::Util::TypeConstraints::find_type_constraint($type);
-    die "Unknown type constraint '$cons'" unless defined($cons);
-
-    return $cons->check($value);
 }
 
 __PACKAGE__->meta->make_immutable;
