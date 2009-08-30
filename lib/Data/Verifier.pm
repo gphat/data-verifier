@@ -49,7 +49,7 @@ sub verify {
 
         # If the param is required, verify that it's there
         if($fprof->{required}) {
-            $results->set_missing($key, 1) unless defined($params->{$key});
+            $results->set_missing($key, 1) unless defined($val);
         }
 
         # Set the value
