@@ -9,7 +9,7 @@ use Moose::Util::TypeConstraints;
 
 has 'filters' => (
     is => 'ro',
-    isa => 'ArrayRef[Str]'
+    isa => 'ArrayRef[Str]',
     default => sub { [] }
 );
 
