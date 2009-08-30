@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -32,6 +32,12 @@ sub verify {
 
         my $val = $params->{$key};
 
+        # Pass through global filters
+        if($self->filters) {
+            $val = $self->_filter_value($self->filters, $val);
+        }
+
+        # And now per-field ones
         if($fprof->{filters}) {
             $val = $self->_filter_value($fprof->{filters}, $val);
         }

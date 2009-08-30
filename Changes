@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.02
+  - Honor global filters
+
 0.01    
   - First version, released on an unsuspecting world.
 
