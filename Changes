@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.04
+  - Properly set coerced values
+
 0.03
   - Set invalid values as undef in Results
   - Add MooseX::Storage to Results can be serialized

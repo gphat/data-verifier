@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -80,6 +80,7 @@ sub verify {
 
             if($fprof->{coerce}) {
                 $val = $cons->coerce($val);
+                $results->set_value($key, $val);
             }
 
             unless($cons->check($val)) {
