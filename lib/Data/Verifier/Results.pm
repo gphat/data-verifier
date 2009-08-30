@@ -98,6 +98,9 @@ Returns true or false based on if the verification's success.
 
 =head1 VALUES
 
+The values present in the result are the filtered, valid values.  These may
+differ from the ones supplied to the verify method.
+
 =head2 get_value ($name)
 
 Returns the value for the specified field.  The value may be different from

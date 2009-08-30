@@ -60,6 +60,7 @@ sub verify {
             # }
 
             $results->set_invalid($key, 1) unless $cons->check($val);
+            $results->set_value($key, undef);
         }
     }
 
@@ -123,10 +124,13 @@ original idea) by leveraging the power of Moose's type constraint system.
     $results->success; # no
 
     $results->is_invalid('name'); # no
-    $results->is_invalid('age'); # yes
+    $results->is_invalid('age');  # yes
 
     $results->is_missing('name'); # no
     $results->is_missing('sign'); # yes
+
+    $results->get_value('name'); # Filtered, valid value
+    $results->get_value('age');  # undefined, as it's invalid
 
 =head1 MOTIVATION
 
