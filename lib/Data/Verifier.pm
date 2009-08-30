@@ -43,7 +43,7 @@ sub verify {
         }
 
         # Empty strings are undefined
-        if($val eq '') {
+        if(defined($val) && $val eq '') {
             $val = undef;
         }
 
@@ -55,14 +55,32 @@ sub verify {
         # Set the value
         $results->set_value($key, $val);
 
+        # No sense in continuing if the value isn't defined.
+        next unless defined($val);
+
+
+        # Check min length
+        if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
+            $results->set_invalid($key, 1);
+            $results->set_value($key, undef);
+            next; # stop processing!
+        }
+
+        # Check max length
+        if($fprof->{max_length} && length($val) > $fprof->{max_length}) {
+            $results->set_invalid($key, 1);
+            $results->set_value($key, undef);
+            next; # stop processing!
+        }
+
         # Validate it
         if(defined($val) && $fprof->{type}) {
             my $cons = Moose::Util::TypeConstraints::find_type_constraint($fprof->{type});
             die "Unknown type constraint '$cons'" unless defined($cons);
 
-            # if($fprof->{coerce}) {
-            #     $val = $cons->coerce($val);
-            # }
+            if($fprof->{coerce}) {
+                $val = $cons->coerce($val);
+            }
 
             unless($cons->check($val)) {
                 $results->set_invalid($key, 1);
@@ -166,11 +184,25 @@ are:
 
 =over 4
 
+=item coerce
+
+If true then the value will be given an opportunity to coerce via Moose's
+type system.
+
 =item filters
 
 An optional list of filters through which this specific value will be run. 
 See the documentation for L<Data::Verifier::Filters> to learn more.  This value
 may be either a string or an arrayref of strings.  
+
+=item max_length
+
+An optional length which the value may not exceed.
+
+
+=item min_length
+
+An optional length which the value may not be less.
 
 =item required
 

@@ -5,6 +5,8 @@ Revision history for Data-Verifier
   - Add MooseX::Storage to Results can be serialized
   - Add values attribute to Results
   - Only validate defined values against types
+  - Enable coercion
+  - Add max_length and min_length
 
 0.02
   - Honor global filters
