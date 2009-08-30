@@ -122,6 +122,18 @@ original idea) by leveraging the power of Moose's type constraint system.
     $results->is_missing('name'); # no
     $results->is_missing('sign'); # yes
 
+=head1 MOTIVATION
+
+Data::Verifier firstly intends to leverage Moose's type constraint system,
+which is significantly more powerful than anything I could create for the
+purposes of this module.  Secondly it aims to keep a fairly simple interface
+by leveraging the aforementioned type system to keep options to a minumum.
+
+=head1 WARNING
+
+This module is under very active development and, while the current API
+will likely not be changed, features will be added rapidly.
+
 =head1 ATTRIBUTES
 
 =head2 filters
