@@ -59,8 +59,10 @@ sub verify {
             #     $val = $cons->coerce($val);
             # }
 
-            $results->set_invalid($key, 1) unless $cons->check($val);
-            $results->set_value($key, undef);
+            unless($cons->check($val)) {
+                $results->set_invalid($key, 1);
+                $results->set_value($key, undef);
+            }
         }
     }
 

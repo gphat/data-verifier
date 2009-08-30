@@ -1,6 +1,9 @@
 package Data::Verifier::Results;
 use Moose;
 use MooseX::AttributeHelpers;
+use MooseX::Storage;
+
+with Storage(format => 'JSON', io => 'File');
 
 has '_invalids' => (
     metaclass => 'Collection::Hash',
@@ -28,7 +31,7 @@ has '_missings' => (
     }
 );
 
-has '_values' => (
+has 'values' => (
     metaclass => 'Collection::Hash',
     is => 'rw',
     isa => 'HashRef',
@@ -100,6 +103,11 @@ Returns true or false based on if the verification's success.
 
 The values present in the result are the filtered, valid values.  These may
 differ from the ones supplied to the verify method.
+
+=head2 values
+
+Returns a hashref of all the fields this profiled verified as the keys and
+the values that remain after verification.
 
 =head2 get_value ($name)
 

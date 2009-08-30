@@ -2,6 +2,7 @@ Revision history for Data-Verifier
 
 0.03
   - Set invalid values as undef in Results
+  - Add MooseX::Storage to Results can be serialized
 
 0.02
   - Honor global filters
