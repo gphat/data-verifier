@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.03
+  - Set invalid values as undef in Results
+
 0.02
   - Honor global filters
 
