@@ -7,6 +7,12 @@ use Data::Verifier::Filters;
 use Data::Verifier::Results;
 use Moose::Util::TypeConstraints;
 
+has 'filters' => (
+    is => 'ro',
+    isa => 'ArrayRef[Str]'
+    default => sub { [] }
+);
+
 has 'profile' => (
     is => 'ro',
     isa => 'HashRef',
@@ -86,20 +92,23 @@ original idea) by leveraging the power of Moose's type constraint system.
 
     use Data::Verifier;
 
-    my $dv = Data::Verifier->new(profile => {
-        name => {
-            required    => 1,
-            type        => 'Str',
-            filters     => [ qw(collapse trim) ]
+    my $dv = Data::Verifier->new(
+        filters => [ qw(trim) ]
+        profile => {
+            name => {
+                required    => 1,
+                type        => 'Str',
+                filters     => [ qw(collapse) ]
+            }
+            age  => {
+                type        => 'Int';
+            },
+            sign => {
+                required    => 1,
+                type        => 'Str'
+            }
         }
-        age  => {
-            type        => 'Int';
-        },
-        sign => {
-            required    => 1,
-            type        => 'Str'
-        }
-    });
+    );
 
     my $results = $dv->verify({
         name => 'Cory', age => 'foobar'
@@ -113,26 +122,37 @@ original idea) by leveraging the power of Moose's type constraint system.
     $results->is_missing('name'); # no
     $results->is_missing('sign'); # yes
 
-=head1 PROFILE
+=head1 ATTRIBUTES
+
+=head2 filters
+
+An optional arrayref of filter names through which B<all> values will be
+passed.
+
+=head2 profile
 
 The profile is a hashref.  Each value you'd like to verify is a key.  The
 values specify all the options to use with the field.  The available options
 are:
 
-=head2 filters
+=over 4
 
-An optional list of filters through which the value will be run.  See the
-documentation for L<Data::Verifier::Filters> to learn more.  This value
-may be either a string or an arrayref of strings.
+=item filters
 
-=head2 required
+An optional list of filters through which this specific value will be run. 
+See the documentation for L<Data::Verifier::Filters> to learn more.  This value
+may be either a string or an arrayref of strings.  
+
+=item required
 
 Determines if this field is required for verification.
 
-=head2 type
+=item type
 
 The name of the Moose type constraint to use with verifying this field's
 value.
+
+=back
 
 =head1 AUTHOR
 
