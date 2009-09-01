@@ -43,5 +43,29 @@ use Data::Verifier;
     ok(!defined($results->get_value('name')), 'name has no value');
 }
 
+{
+    my $verifier = Data::Verifier->new(
+        profile => {
+            name    => {
+                required => 1
+            },
+            age     => {
+                required => 1,
+                type => 'Int'
+            }
+        }
+    );
+
+    my $results = $verifier->verify({ name => 'foo', age => 0 });
+
+    ok($results->success, 'success');
+    cmp_ok($results->valid_count, '==', 2, '2 valid');
+    cmp_ok($results->invalid_count, '==', 0, 'none invalid');
+    cmp_ok($results->missing_count, '==', 0, 'none missing');
+    ok($results->is_valid('name'), 'name is valid');
+    cmp_ok($results->get_value('name'), 'eq', 'foo', 'get_value');
+    ok($results->is_valid('age'), 'age is valid');
+}
+
 
 done_testing;
