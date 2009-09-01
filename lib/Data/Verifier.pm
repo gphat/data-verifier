@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -86,16 +86,16 @@ sub verify {
         # check for dependents
         my $dependent = $fprof->{dependent};
         if($dependent) {
-            # Create a new verifier for use withe the dependants
+            # Create a new verifier for use withe the dependents
             my $dep_verifier = Data::Verifier->new(
                 filters => $self->filters,
                 profile => $dependent
             );
             my $dep_results = $dep_verifier->verify($params);
-            # Merge the dependant's results with the parent one
+            # Merge the dependent's results with the parent one
             $results->merge($dep_results);
 
-            # If the dependant isn't valid, then this field isn't either
+            # If the dependent isn't valid, then this field isn't either
             unless($dep_results->success) {
                 $results->set_invalid($key, 1);
                 next; # stop processing!
