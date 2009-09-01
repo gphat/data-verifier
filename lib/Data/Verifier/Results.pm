@@ -41,11 +41,12 @@ has 'values' => (
         delete  => 'delete_value',
         exists  => 'is_valid',
         get     => 'get_value',
-        keys    => 'valids',
+        keys    => 'values',
         set     => 'set_value',
     }
 );
 
+__PACKAGE__->meta->add_method('valids' => __PACKAGE__->can('values'));
 __PACKAGE__->meta->add_method('valid_count' => __PACKAGE__->can('value_count'));
 
 sub merge {
