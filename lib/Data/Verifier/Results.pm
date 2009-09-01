@@ -11,10 +11,10 @@ has '_invalids' => (
     isa => 'HashRef',
     default => sub { {} },
     provides => {
-        set     => 'set_invalid',
-        get     => 'is_invalid',
+        count   => 'invalid_count',
+        exists  => 'is_invalid',
         keys    => 'invalids',
-        count   => 'invalid_count'
+        set     => 'set_invalid',
     }
 );
 
@@ -24,10 +24,10 @@ has '_missings' => (
     isa => 'HashRef',
     default => sub { {} },
     provides => {
-        set     => 'set_missing',
-        get     => 'is_missing',
+        count   => 'missing_count',
+        exists  => 'is_missing',
         keys    => 'missings',
-        count   => 'missing_count'
+        set     => 'set_missing',
     }
 );
 
@@ -37,11 +37,16 @@ has 'values' => (
     isa => 'HashRef',
     default => sub { {} },
     provides => {
+        count   => 'value_count',
+        delete  => 'delete_value',
+        exists  => 'is_valid',
         get     => 'get_value',
+        keys    => 'valids',
         set     => 'set_value',
-        keys    => 'value_keys'
     }
 );
+
+__PACKAGE__->meta->add_method('valid_count' => __PACKAGE__->can('value_count'));
 
 sub merge {
     my ($self, $other) = @_;
@@ -54,7 +59,7 @@ sub merge {
         $self->set_missing($m, 1);
     }
 
-    foreach my $k ($other->value_keys) {
+    foreach my $k ($other->valids) {
         $self->set_value($k, $other->get_value($k));
     }
 }
@@ -121,19 +126,37 @@ Returns true or false based on if the verification's success.
 The values present in the result are the filtered, valid values.  These may
 differ from the ones supplied to the verify method.
 
+=head2 valid_count
+
+Returns the number of valid fields in this Results.
+
 =head2 values
 
 Returns a hashref of all the fields this profiled verified as the keys and
 the values that remain after verification.
 
-=head2 value_keys
+=head2 delete_value ($name)
 
-Returns a list of keys for which we have values.
+Deletes the specified value from the results.
 
 =head2 get_value ($name)
 
 Returns the value for the specified field.  The value may be different from
 the one originally supplied due to filtering or coercion.
+
+=head2 value_count
+
+Returns the number of values in this Results.
+
+=head1 VALID FIELDS
+
+=head2 is_valid ($name)
+
+Returns true if the field is valid.
+
+=head2 valids
+
+Returns a list of keys for which we have valid values.
 
 =head1 INVALID FIELDS
 
