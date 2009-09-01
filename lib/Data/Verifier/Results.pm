@@ -39,8 +39,25 @@ has 'values' => (
     provides => {
         get     => 'get_value',
         set     => 'set_value',
+        keys    => 'value_keys'
     }
 );
+
+sub merge {
+    my ($self, $other) = @_;
+
+    foreach my $i ($other->invalids) {
+        $self->set_invalid($i, 1);
+    }
+
+    foreach my $m ($other->missings) {
+        $self->set_missing($m, 1);
+    }
+
+    foreach my $k ($other->value_keys) {
+        $self->set_value($k, $other->get_value($k));
+    }
+}
 
 sub success {
     my ($self) = @_;
@@ -108,6 +125,10 @@ differ from the ones supplied to the verify method.
 
 Returns a hashref of all the fields this profiled verified as the keys and
 the values that remain after verification.
+
+=head2 value_keys
+
+Returns a list of keys for which we have values.
 
 =head2 get_value ($name)
 
