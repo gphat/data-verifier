@@ -31,7 +31,7 @@ has '_missings' => (
     }
 );
 
-has 'values' => (
+has '_values' => (
     metaclass => 'Collection::Hash',
     is => 'rw',
     isa => 'HashRef',
