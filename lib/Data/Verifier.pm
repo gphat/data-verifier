@@ -206,6 +206,28 @@ are:
 If true then the value will be given an opportunity to coerce via Moose's
 type system.
 
+=item dependent
+
+Allows a set of fields to be specifid as dependents of this one.  The argument
+for this key is a full-fledged profile as you would give to the profile key:
+
+  my $verifier = Data::Verifier->new(
+      profile => {
+          password    => {
+              dependent => {
+                  password2 => {
+                      required => 1,
+                  }
+              }
+          }
+      }
+  );
+
+In the above example C<password> is not required.  If it is provided then
+password2 must also be provided.  If any depedents of a field are missing or
+invalid then that field is B<invalid>.  In our example if password is provided
+and password2 is missing then password will be invalid.
+
 =item filters
 
 An optional list of filters through which this specific value will be run. 
