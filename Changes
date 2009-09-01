@@ -1,5 +1,12 @@
 Revision history for Data-Verifier
 
+0.05
+  * Add dependent key for creating dependent fields
+  * Result
+    * Add merge method that adds the supplied result to this one
+    * Add is_valid, valid_count and valids
+  * Rejigger most is_* methods to return more appropriate values
+
 0.04
   - Properly set coerced values
 
