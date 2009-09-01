@@ -22,7 +22,6 @@ use Data::Verifier;
 
 {
     my $verifier = Data::Verifier->new(
-        name => 'some_form',
         profile => {
             name    => {
                 required => 1,
