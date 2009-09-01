@@ -125,7 +125,8 @@ Returns true or false based on if the verification's success.
 =head1 VALUES
 
 The values present in the result are the filtered, valid values.  These may
-differ from the ones supplied to the verify method.
+differ from the ones supplied to the verify method due to either filters
+or coercions.
 
 =head2 valid_count
 
