@@ -15,7 +15,7 @@ has 'filters' => (
 
 has 'profile' => (
     is => 'ro',
-    isa => 'HashRef',
+    isa => 'HashRef[HashRef]',
     required => 1
 );
 
@@ -52,9 +52,6 @@ sub verify {
             $results->set_missing($key, 1) unless defined($val);
         }
 
-        # Set the value
-        $results->set_value($key, $val);
-
         # No sense in continuing if the value isn't defined.
         next unless defined($val);
 
@@ -62,14 +59,12 @@ sub verify {
         # Check min length
         if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
             $results->set_invalid($key, 1);
-            $results->set_value($key, undef);
             next; # stop processing!
         }
 
         # Check max length
         if($fprof->{max_length} && length($val) > $fprof->{max_length}) {
             $results->set_invalid($key, 1);
-            $results->set_value($key, undef);
             next; # stop processing!
         }
 
@@ -80,14 +75,35 @@ sub verify {
 
             if($fprof->{coerce}) {
                 $val = $cons->coerce($val);
-                $results->set_value($key, $val);
             }
 
             unless($cons->check($val)) {
                 $results->set_invalid($key, 1);
-                $results->set_value($key, undef);
+                next; # stop processing!
             }
         }
+
+        # check for dependents
+        my $dependent = $fprof->{dependent};
+        if($dependent) {
+            # Create a new verifier for use withe the dependants
+            my $dep_verifier = Data::Verifier->new(
+                filters => $self->filters,
+                profile => $dependent
+            );
+            my $dep_results = $dep_verifier->verify($params);
+            # Merge the dependant's results with the parent one
+            $results->merge($dep_results);
+
+            # If the dependant isn't valid, then this field isn't either
+            unless($dep_results->success) {
+                $results->set_invalid($key, 1);
+                next; # stop processing!
+            }
+        }
+
+        # Set the value
+        $results->set_value($key, $val);
     }
 
     return $results;
