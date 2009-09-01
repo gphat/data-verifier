@@ -20,3 +20,5 @@ t/01-simple.t
 t/02-types.t
 t/03-filters.t
 t/04-lengths.t
+t/05-result-merge.t
+t/06-dependents.t
