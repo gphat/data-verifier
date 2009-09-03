@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.06
+  * Add post_check key
+
 0.05
   * Add dependent key for creating dependent fields
   * Result

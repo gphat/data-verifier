@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -25,6 +25,7 @@ sub verify {
     my $results = Data::Verifier::Results->new;
     my $profile = $self->profile;
 
+    my @post_checks = ();
     foreach my $key (keys(%{ $profile })) {
 
         # Get the profile part that is pertinent to this field
@@ -55,7 +56,6 @@ sub verify {
         # No sense in continuing if the value isn't defined.
         next unless defined($val);
 
-
         # Check min length
         if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
             $results->set_invalid($key, 1);
@@ -85,13 +85,15 @@ sub verify {
 
         # check for dependents
         my $dependent = $fprof->{dependent};
+        my $dep_results;
         if($dependent) {
             # Create a new verifier for use withe the dependents
             my $dep_verifier = Data::Verifier->new(
                 filters => $self->filters,
                 profile => $dependent
             );
-            my $dep_results = $dep_verifier->verify($params);
+            $dep_results = $dep_verifier->verify($params);
+
             # Merge the dependent's results with the parent one
             $results->merge($dep_results);
 
@@ -102,8 +104,30 @@ sub verify {
             }
         }
 
+        # Add this key the post check so we know to run through them
+        if(defined($fprof->{post_check}) && $fprof->{post_check}) {
+            push(@post_checks, $key);
+        }
+
         # Set the value
         $results->set_value($key, $val);
+    }
+
+    # If we have any post checks, do them.
+    if(scalar(@post_checks)) {
+        foreach my $key (@post_checks) {
+            my $fprof = $profile->{$key};
+
+            # Execute the post_check...
+            if(defined($fprof->{post_check}) && $fprof->{post_check}) {
+                unless($fprof->{post_check}->($results)) {
+                    # If that returned false, then this field is invalid!
+                    $results->delete_value($key);
+                    $results->set_invalid($key, 1);
+                    next;
+                }
+            }
+        }
     }
 
     return $results;
@@ -201,12 +225,12 @@ are:
 
 =over 4
 
-=item coerce
+=item B<coerce>
 
 If true then the value will be given an opportunity to coerce via Moose's
 type system.
 
-=item dependent
+=item B<dependent>
 
 Allows a set of fields to be specifid as dependents of this one.  The argument
 for this key is a full-fledged profile as you would give to the profile key:
@@ -228,26 +252,64 @@ password2 must also be provided.  If any depedents of a field are missing or
 invalid then that field is B<invalid>.  In our example if password is provided
 and password2 is missing then password will be invalid.
 
-=item filters
+=item B<filters>
 
 An optional list of filters through which this specific value will be run. 
 See the documentation for L<Data::Verifier::Filters> to learn more.  This value
 may be either a string or an arrayref of strings.  
 
-=item max_length
+=item B<max_length>
 
 An optional length which the value may not exceed.
 
-
-=item min_length
+=item B<min_length>
 
 An optional length which the value may not be less.
 
-=item required
+=item B<post_check>
+
+The C<post_check> key takes a subref and, after all verification has finished,
+executes the subref with the results of the verification as it's only argument.
+The subref's return value determines if the field to which the post_check
+belongs is invalid.  A typical example would be when the value of one field
+must be equal to the other, like an email confirmation:
+
+  my $verifier = Data::Verifier->new(
+      profile => {
+          email    => {
+              required => 1,
+              dependent => {
+                  email2 => {
+                      required => 1,
+                  }
+              },
+              post_check => sub {
+                  my $r = shift;
+                  return $r->get_value('email') eq $r->get_value('email2');
+              }
+          },
+      }
+  );
+
+  my $results = $verifier->verify({
+      email => 'foo@example.com', email2 => 'foo2@example.com'
+  });
+
+  $results->success; # false
+  $results->is_valid('email'); # false
+  $results->is_valid('email2); # true, as it has no post_check
+
+In the above example, C<success> will return false, because the value of
+C<email> does not match the value of C<email2>.  C<is_valid> will return false
+for C<email> but true for C<email2>, since nothing specifically invalidated it.
+In this example you should rely on the C<email> field, as C<email2> carries no
+significance but to confirm C<email>.
+
+=item B<required>
 
 Determines if this field is required for verification.
 
-=item type
+=item B<type>
 
 The name of the Moose type constraint to use with verifying this field's
 value.

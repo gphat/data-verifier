@@ -51,7 +51,7 @@ my $verifier = Data::Verifier->new(
     });
 
     ok(!$results->success, 'failure (dependent tripped)');
-    cmp_ok($results->invalid_count, '==', 1, 'none invalid');
+    cmp_ok($results->invalid_count, '==', 1, '1 invalid');
     cmp_ok($results->missing_count, '==', 1, '1 missing');
     cmp_ok($results->get_value('username'), 'eq', 'foobar', 'get_value username');
     ok(!defined($results->get_value('password')), 'get_value password');
