@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.07
+  * Add coercion method and attribute for site-specific coercions
+
 0.06
   * Add post_check key
 
