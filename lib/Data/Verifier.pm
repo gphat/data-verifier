@@ -19,6 +19,15 @@ has 'profile' => (
     required => 1
 );
 
+sub coercion {
+    my %params = @_;
+    Moose::Meta::TypeCoercion->new(
+        type_coercion_map => [
+            $params{'from'} => $params{'via'}
+        ]
+    );
+}
+
 sub verify {
     my ($self, $params) = @_;
 
@@ -76,7 +85,9 @@ sub verify {
             if($fprof->{coerce}) {
                 $val = $cons->coerce($val);
             }
-
+            elsif(my $coercion = $fprof->{coercion}) {
+                $val = $coercion->coerce($val);
+            }
             unless($cons->check($val)) {
                 $results->set_invalid($key, 1);
                 next; # stop processing!
@@ -210,6 +221,29 @@ by leveraging the aforementioned type system to keep options to a minumum.
 This module is under very active development and, while the current API
 will likely not be changed, features will be added rapidly.
 
+=head1 METHODS
+
+=head2 coercion
+
+Define a coercion to use for verification.  This will not define a global
+Moose type coercion, but is instead just a single coercion to apply to a 
+specific entity.
+
+    my $verifier = Data::Verifier->new(
+        profile => {
+            a_string => {
+                type     => 'Str',
+                coercion => Data::Verifier::coercion(
+                    from => 'Int', 
+                        via => sub { (qw[ one two three ])[ ($_ - 1) ] }
+                ),
+            },
+        }
+    );
+
+Now, after C<a_string> is processed by Data::Verifier, the results will 
+return the coerced and validated value.
+
 =head1 ATTRIBUTES
 
 =head2 filters
@@ -228,7 +262,12 @@ are:
 =item B<coerce>
 
 If true then the value will be given an opportunity to coerce via Moose's
-type system.
+type system.  If this is set, coercion will be ignored.
+
+=item B<coercion>
+
+Set this attribute to the coercion defined for this type.  If B<coerce> is 
+set this attribute will be ignored.
 
 =item B<dependent>
 
