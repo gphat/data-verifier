@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -215,11 +215,6 @@ Data::Verifier firstly intends to leverage Moose's type constraint system,
 which is significantly more powerful than anything I could create for the
 purposes of this module.  Secondly it aims to keep a fairly simple interface
 by leveraging the aforementioned type system to keep options to a minumum.
-
-=head1 WARNING
-
-This module is under very active development and, while the current API
-will likely not be changed, features will be added rapidly.
 
 =head1 METHODS
 
