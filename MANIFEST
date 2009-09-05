@@ -22,3 +22,5 @@ t/03-filters.t
 t/04-lengths.t
 t/05-result-merge.t
 t/06-dependents.t
+t/07-post-check.t
+t/08-coerce.t
