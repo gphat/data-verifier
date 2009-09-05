@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -267,7 +267,7 @@ type system.  If this is set, coercion will be ignored.
 =item B<coercion>
 
 Set this attribute to the coercion defined for this type.  If B<coerce> is 
-set this attribute will be ignored.
+set this attribute will be ignored.  See the C<coercion> method above.
 
 =item B<dependent>
 
@@ -358,6 +358,12 @@ value.
 =head1 AUTHOR
 
 Cory G Watson, C<< <gphat at cpan.org> >>
+
+=head1 CONTRIBUTORS
+
+J. Shirley
+
+Stevan Little
 
 =head1 COPYRIGHT & LICENSE
 

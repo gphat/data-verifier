@@ -44,5 +44,4 @@ use Moose::Util::TypeConstraints;
     cmp_ok($results->get_value('str'), 'eq', 'two', 'get_value(str) is two');
 }
 
-
 done_testing;
