@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.09
+  * Document check order
+
 0.08
   * Remove warning
 

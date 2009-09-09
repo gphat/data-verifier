@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -347,6 +347,47 @@ Determines if this field is required for verification.
 
 The name of the Moose type constraint to use with verifying this field's
 value.
+
+=back
+
+=head1 EXECUTION ORDER
+
+It may be important to understand the order in which the various steps of
+verification are performed:
+
+=over 4
+
+=item Global Filters
+
+Any global filters in the profile are executed.
+
+=item Per-Field Filters
+
+Any per-field filters are executed.
+
+=item Empty String Check
+
+If the value of the field is an empty string then it is changed to an undef.
+
+=item Required Check
+
+The parameter must now be defined if it is set as required.
+
+=item Length Check
+
+Minimum then maximum length is checked.
+
+=item Type Check (w/Coercion)
+
+At this point the type will be checked after an optional coercion.
+
+=item Depedency Checks
+
+If this field has dependents then those will not be processed.
+
+=item Post Check
+
+If the field has a post check it will now be executed.
 
 =back
 
