@@ -10,7 +10,6 @@ use Data::Verifier;
                 required => 1,
                 post_check => sub {
                     my $r = shift;
-                    return 0 if !$r->is_valid('password2');
                     return $r->get_value('password') eq $r->get_value('password2');
                 }
             },
