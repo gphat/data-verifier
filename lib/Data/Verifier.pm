@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -59,7 +59,7 @@ sub verify {
 
         # If the param is required, verify that it's there
         if($fprof->{required}) {
-            $results->set_missing($key, 1) unless defined($val);
+            $results->set_status($key, 'missing') unless defined($val);
         }
 
         # No sense in continuing if the value isn't defined.
@@ -67,13 +67,13 @@ sub verify {
 
         # Check min length
         if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
-            $results->set_invalid($key, 1);
+            $results->set_status($key, 'invalid');
             next; # stop processing!
         }
 
         # Check max length
         if($fprof->{max_length} && length($val) > $fprof->{max_length}) {
-            $results->set_invalid($key, 1);
+            $results->set_status($key, 'invalid');
             next; # stop processing!
         }
 
@@ -89,7 +89,7 @@ sub verify {
                 $val = $coercion->coerce($val);
             }
             unless($cons->check($val)) {
-                $results->set_invalid($key, 1);
+                $results->set_status($key, 'invalid');
                 next; # stop processing!
             }
         }
@@ -110,7 +110,7 @@ sub verify {
 
             # If the dependent isn't valid, then this field isn't either
             unless($dep_results->success) {
-                $results->set_invalid($key, 1);
+                $results->set_status($key, 'invalid');
                 next; # stop processing!
             }
         }
@@ -122,6 +122,7 @@ sub verify {
 
         # Set the value
         $results->set_value($key, $val);
+        $results->set_status($key, 'valid');
     }
 
     # If we have any post checks, do them.
@@ -130,11 +131,12 @@ sub verify {
             my $fprof = $profile->{$key};
 
             # Execute the post_check...
-            if(defined($fprof->{post_check}) && $fprof->{post_check}) {
-                unless($fprof->{post_check}->($results)) {
+            my $pc = $fprof->{post_check};
+            if(defined($pc) && $pc) {
+                unless($results->$pc()) {
                     # If that returned false, then this field is invalid!
                     $results->delete_value($key);
-                    $results->set_invalid($key, 1);
+                    $results->set_status($key, 'invalid');
                     next;
                 }
             }

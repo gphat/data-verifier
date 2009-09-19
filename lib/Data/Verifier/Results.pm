@@ -5,29 +5,15 @@ use MooseX::Storage;
 
 with Storage(format => 'JSON', io => 'File');
 
-has '_invalids' => (
+has '_statuses' => (
     metaclass => 'Collection::Hash',
     is => 'rw',
     isa => 'HashRef',
     default => sub { {} },
     provides => {
-        count   => 'invalid_count',
-        exists  => 'is_invalid',
-        keys    => 'invalids',
-        set     => 'set_invalid',
-    }
-);
-
-has '_missings' => (
-    metaclass => 'Collection::Hash',
-    is => 'rw',
-    isa => 'HashRef',
-    default => sub { {} },
-    provides => {
-        count   => 'missing_count',
-        exists  => 'is_missing',
-        keys    => 'missings',
-        set     => 'set_missing',
+        exists  => 'is_statused',
+        get     => 'get_status',
+        set     => 'set_status'
     }
 );
 
@@ -39,7 +25,7 @@ has '_values' => (
     provides => {
         count   => 'value_count',
         delete  => 'delete_value',
-        exists  => 'is_valid',
+        # exists  => 'is_valid',
         get     => 'get_value',
         keys    => 'values',
         set     => 'set_value',
@@ -49,20 +35,79 @@ has '_values' => (
 __PACKAGE__->meta->add_method('valids' => __PACKAGE__->can('values'));
 __PACKAGE__->meta->add_method('valid_count' => __PACKAGE__->can('value_count'));
 
+sub _is_something {
+    my ($self, $status, $field) = @_;
+
+    if($self->is_statused($field)) {
+        return $self->get_status($field) eq $status;
+    }
+
+    return 0;
+}
+
+sub _somethings {
+    my ($self, $status) = @_;
+
+    return grep({ $self->get_status($_) eq $status } keys %{ $self->_statuses });
+}
+
+
+sub is_invalid {
+    my ($self, $field) = @_;
+
+    return $self->_is_something('invalid', $field);
+}
+
+sub is_missing {
+    my ($self, $field) = @_;
+
+    return $self->_is_something('missing', $field);
+}
+
+sub is_valid {
+    my ($self, $field) = @_;
+
+    return $self->_is_something('valid', $field);
+}
+
 sub merge {
     my ($self, $other) = @_;
 
     foreach my $i ($other->invalids) {
-        $self->set_invalid($i, 1);
+        $self->set_status($i, 'invalid');
     }
 
     foreach my $m ($other->missings) {
-        $self->set_missing($m, 1);
+        $self->set_status($m, 'missing');
     }
 
     foreach my $k ($other->valids) {
         $self->set_value($k, $other->get_value($k));
     }
+}
+
+sub invalid_count {
+    my ($self) = @_;
+
+    return scalar($self->invalids);
+}
+
+sub invalids {
+    my ($self) = @_;
+
+    return $self->_somethings('invalid');
+}
+
+sub missing_count {
+    my ($self) = @_;
+
+    return scalar($self->missings);
+}
+
+sub missings {
+    my ($self) = @_;
+
+    return $self->_somethings('missing');
 }
 
 sub success {
