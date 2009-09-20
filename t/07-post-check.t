@@ -59,5 +59,33 @@ use Data::Verifier;
     ok($results->is_valid('email2'), 'email2 is valid');
 }
 
+{
+    my $verifier = Data::Verifier->new(
+        profile => {
+            email    => {
+                required => 1,
+                dependent => {
+                    email2 => {
+                        required => 1,
+                    }
+                },
+                post_check => sub {
+                    my $r = shift;
+                    die "Wakka Wakka!\n";
+                }
+            },
+        }
+    );
+
+    my $results = $verifier->verify({ email => 'foo', email2 => 'foo2' });
+
+    ok(!$results->success, 'failed');
+    cmp_ok($results->valid_count, '==', 1, '1 valid');
+    cmp_ok($results->invalid_count, '==', 1, '1 invalid');
+    cmp_ok($results->missing_count, '==', 0, 'none missing');
+    ok($results->is_invalid('email'), 'email is invalid');
+    ok($results->is_valid('email2'), 'email2 is valid');
+    cmp_ok($results->get_field('email')->reason, 'eq', "Wakka Wakka!\n", 'exception in reason');
+}
 
 done_testing;

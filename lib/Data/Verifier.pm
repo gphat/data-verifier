@@ -160,6 +160,7 @@ sub verify {
                 } catch {
                     $field->reason($_);
                     $field->value(undef);
+                    $field->valid(0);
                 }
             }
         }
@@ -362,6 +363,10 @@ C<email> does not match the value of C<email2>.  C<is_valid> will return false
 for C<email> but true for C<email2>, since nothing specifically invalidated it.
 In this example you should rely on the C<email> field, as C<email2> carries no
 significance but to confirm C<email>.
+
+B<Note about post_check and exceptions>: If have a more complex post_check
+that could fail in multiple ways, you can C<die> in your post_check coderef
+and the exception will be stored in the fields C<reason> attribute.
 
 =item B<required>
 
