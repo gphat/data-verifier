@@ -9,6 +9,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/Data/Verifier.pm
+lib/Data/Verifier/Field.pm
 lib/Data/Verifier/Filters.pm
 lib/Data/Verifier/Results.pm
 Makefile.PL
