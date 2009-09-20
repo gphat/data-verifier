@@ -3,8 +3,7 @@ Revision history for Data-Verifier
 0.10
   * Change post_check's calling convention after reading some wisdom from
     nuffin: http://blog.woobling.org/2009/09/method-style-callbacks.html
-  * Change internal API to use statuses rather than a separate missing &
-    invalid hash.
+  * Change internal API to use a field class rather than a bunch of hashes.
 
 0.09
   * Document check order

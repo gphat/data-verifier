@@ -5,84 +5,57 @@ use MooseX::Storage;
 
 with Storage(format => 'JSON', io => 'File');
 
-has '_statuses' => (
+has 'fields' => (
     metaclass => 'Collection::Hash',
     is => 'rw',
     isa => 'HashRef',
     default => sub { {} },
     provides => {
-        exists  => 'is_statused',
-        get     => 'get_status',
-        set     => 'set_status'
+        get     => 'get_field',
+        set     => 'set_field'
     }
 );
 
-has '_values' => (
-    metaclass => 'Collection::Hash',
-    is => 'rw',
-    isa => 'HashRef',
-    default => sub { {} },
-    provides => {
-        count   => 'value_count',
-        delete  => 'delete_value',
-        # exists  => 'is_valid',
-        get     => 'get_value',
-        keys    => 'values',
-        set     => 'set_value',
-    }
-);
+sub get_value {
+    my ($self, $key) = @_;
 
-__PACKAGE__->meta->add_method('valids' => __PACKAGE__->can('values'));
-__PACKAGE__->meta->add_method('valid_count' => __PACKAGE__->can('value_count'));
-
-sub _is_something {
-    my ($self, $status, $field) = @_;
-
-    if($self->is_statused($field)) {
-        return $self->get_status($field) eq $status;
-    }
-
-    return 0;
+    my $f = $self->get_field($key);
+    return undef unless defined($f);
+    return $f->value;
 }
-
-sub _somethings {
-    my ($self, $status) = @_;
-
-    return grep({ $self->get_status($_) eq $status } keys %{ $self->_statuses });
-}
-
 
 sub is_invalid {
     my ($self, $field) = @_;
 
-    return $self->_is_something('invalid', $field);
+    my $f = $self->get_field($field);
+
+    return 0 unless defined($f);
+    return $f->valid ? 0 : 1;
 }
 
 sub is_missing {
     my ($self, $field) = @_;
 
-    return $self->_is_something('missing', $field);
+    my $f = $self->get_field($field);
+
+    return 1 unless defined($f);
+    return 0;
 }
 
 sub is_valid {
     my ($self, $field) = @_;
 
-    return $self->_is_something('valid', $field);
+    my $f = $self->get_field($field);
+
+    return 0 unless defined($f);
+    return $f->valid ? 1 : 0;
 }
 
 sub merge {
     my ($self, $other) = @_;
 
-    foreach my $i ($other->invalids) {
-        $self->set_status($i, 'invalid');
-    }
-
-    foreach my $m ($other->missings) {
-        $self->set_status($m, 'missing');
-    }
-
-    foreach my $k ($other->valids) {
-        $self->set_value($k, $other->get_value($k));
+    foreach my $f (keys %{ $other->fields }) {
+        $self->set_field($f, $other->get_field($f));
     }
 }
 
@@ -95,7 +68,10 @@ sub invalid_count {
 sub invalids {
     my ($self) = @_;
 
-    return $self->_somethings('invalid');
+    return grep(
+        { my $field = $self->get_field($_); defined($field) && !$field->valid; }
+        keys %{ $self->fields }
+    );
 }
 
 sub missing_count {
@@ -107,7 +83,10 @@ sub missing_count {
 sub missings {
     my ($self) = @_;
 
-    return $self->_somethings('missing');
+    return grep(
+        { my $field = $self->get_field($_); !defined($field) }
+        keys %{ $self->fields }
+    );
 }
 
 sub success {
@@ -118,6 +97,21 @@ sub success {
     }
 
     return 1;
+}
+
+sub valids {
+    my ($self) = @_;
+
+    return grep(
+        { my $field = $self->get_field($_); defined($field) && $field->valid; }
+        keys %{ $self->fields }
+    );
+}
+
+sub valid_count {
+    my ($self) = @_;
+
+    return scalar($self->valids);
 }
 
 __PACKAGE__->meta->make_immutable;

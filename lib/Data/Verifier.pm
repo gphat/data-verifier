@@ -3,9 +3,11 @@ use Moose;
 
 our $VERSION = '0.10';
 
+use Data::Verifier::Field;
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
 use Moose::Util::TypeConstraints;
+use Try::Tiny;
 
 has 'filters' => (
     is => 'ro',
@@ -57,23 +59,33 @@ sub verify {
             $val = undef;
         }
 
-        # If the param is required, verify that it's there
-        if($fprof->{required}) {
-            $results->set_status($key, 'missing') unless defined($val);
+        my $field = Data::Verifier::Field->new(
+            value => $val
+        );
+
+        if($fprof->{required} && !defined($val)) {
+            # Set required fields to undef, as they are missing
+            $results->set_field($key, undef);
+        } else {
+            $results->set_field($key, $field);
         }
 
         # No sense in continuing if the value isn't defined.
         next unless defined($val);
 
+
+
         # Check min length
         if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
-            $results->set_status($key, 'invalid');
+            $field->reason('min_length');
+            $field->valid(0);
             next; # stop processing!
         }
 
         # Check max length
         if($fprof->{max_length} && length($val) > $fprof->{max_length}) {
-            $results->set_status($key, 'invalid');
+            $field->reason('max_length');
+            $field->valid(0);
             next; # stop processing!
         }
 
@@ -89,7 +101,9 @@ sub verify {
                 $val = $coercion->coerce($val);
             }
             unless($cons->check($val)) {
-                $results->set_status($key, 'invalid');
+                $field->reason('type_constraint');
+                $field->valid(0);
+                $field->value(undef);
                 next; # stop processing!
             }
         }
@@ -110,7 +124,9 @@ sub verify {
 
             # If the dependent isn't valid, then this field isn't either
             unless($dep_results->success) {
-                $results->set_status($key, 'invalid');
+                $field->reason('dependent');
+                $field->valid(0);
+                $field->value(undef);
                 next; # stop processing!
             }
         }
@@ -121,23 +137,29 @@ sub verify {
         }
 
         # Set the value
-        $results->set_value($key, $val);
-        $results->set_status($key, 'valid');
+        $field->value($val);
+        $field->valid(1);
     }
 
     # If we have any post checks, do them.
     if(scalar(@post_checks)) {
         foreach my $key (@post_checks) {
             my $fprof = $profile->{$key};
+            my $field = $results->get_field($key);
 
             # Execute the post_check...
             my $pc = $fprof->{post_check};
             if(defined($pc) && $pc) {
-                unless($results->$pc()) {
-                    # If that returned false, then this field is invalid!
-                    $results->delete_value($key);
-                    $results->set_status($key, 'invalid');
-                    next;
+                try {
+                    unless($results->$pc()) {
+                        # If that returned false, then this field is invalid!
+                        $field->value(undef);
+                        $field->reason('post_check') unless $field->has_reason;
+                        $field->valid(0);
+                    }
+                } catch {
+                    $field->reason($_);
+                    $field->value(undef);
                 }
             }
         }
