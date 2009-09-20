@@ -10,6 +10,7 @@ build_requires 'Test::More' => '0.88';
 requires 'Moose' => '0.89';
 requires 'MooseX::AttributeHelpers' => '0.21';
 requires 'MooseX::Storage' => '0.21';
+requires 'Try::Tiny' => '0.02';
 
 WriteAll;
 
