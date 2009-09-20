@@ -227,6 +227,17 @@ Returns a list of missing field names.
 
 Returns the count of missing fields in this result.
 
+=head1 FIELDS
+
+=head2 get_field ($name)
+
+Gets the field object, if it exists, for the name provided.
+
+=head2 set_field ($name)
+
+Sets the field object (you shouldn't be doing this directly) for the name
+provided.
+
 =head1 AUTHOR
 
 Cory G Watson, C<< <gphat at cpan.org> >>
