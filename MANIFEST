@@ -25,3 +25,4 @@ t/05-result-merge.t
 t/06-dependents.t
 t/07-post-check.t
 t/08-coerce.t
+t/09-storage.t
