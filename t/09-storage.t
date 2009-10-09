@@ -26,6 +26,13 @@ use Moose::Util::TypeConstraints;
     ok($results->success, 'success');
     cmp_ok($results->get_original_value('num'), 'eq', 'two', 'get_original_value');
     cmp_ok($results->get_value('num'), '==', 2, 'get_value(num) is 2');
+
+    my $ser = $results->freeze;
+
+    my $deresults = Data::Verifier::Results->thaw($ser);
+
+    ok(!defined($deresults->get_value('num')), 'undefined value for num');
+    ok($deresults->get_original_value('num'), 'got original value');
 }
 
 {
@@ -44,6 +51,13 @@ use Moose::Util::TypeConstraints;
     ok($results->success, 'success');
     cmp_ok($results->get_original_value('str'), '==', 2, 'get_original_value');
     cmp_ok($results->get_value('str'), 'eq', 'two', 'get_value(str) is two');
+
+    my $ser = $results->freeze;
+
+    my $deresults = Data::Verifier::Results->thaw($ser);
+
+    ok(!defined($deresults->get_value('str')), 'undefined value for num');
+    cmp_ok($deresults->get_original_value('str'), '==', 2, 'got original value');
 }
 
 done_testing;

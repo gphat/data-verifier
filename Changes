@@ -1,5 +1,13 @@
 Revision history for Data-Verifier
 
+0.20
+  * Improve Field POD
+  * Add clear_value to Field and use it rather than value(undef) (which
+    validates the type constraint and is just bad form.)
+  * Add original_value attribute that holds the value that was submitted for
+    the field.
+  * Result's value is no longer serialized.
+
 0.10
   * Change post_check's calling convention after reading some wisdom from
     nuffin: http://blog.woobling.org/2009/09/method-style-callbacks.html

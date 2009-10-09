@@ -20,6 +20,7 @@ use Data::Verifier;
     cmp_ok($results->missing_count, '==', 0, 'none missing');
     ok($results->is_valid('name'), 'name is valid');
     cmp_ok($results->get_value('name'), 'eq', 'foo', 'get_value');
+    cmp_ok($results->get_original_value('name'), 'eq', 'foo', 'get_original_value');
 }
 
 {

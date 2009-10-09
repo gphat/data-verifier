@@ -16,6 +16,14 @@ has 'fields' => (
     }
 );
 
+sub get_original_value {
+    my ($self, $key) = @_;
+
+    my $f = $self->get_field($key);
+    return undef unless defined($f);
+    return $f->original_value;
+}
+
 sub get_value {
     my ($self, $key) = @_;
 
@@ -180,6 +188,10 @@ the values that remain after verification.
 
 Deletes the specified value from the results.
 
+=head2 get_original_value ($name)
+
+Get the original value for the specified field.
+
 =head2 get_value ($name)
 
 Returns the value for the specified field.  The value may be different from
@@ -237,6 +249,15 @@ Gets the field object, if it exists, for the name provided.
 
 Sets the field object (you shouldn't be doing this directly) for the name
 provided.
+
+=head1 SERIALIZATION
+
+Data::Verifier uses MooseX::Storage to allow quick and easy serialization.
+So a quick call to C<freeze> will serialize this object into JSON and C<thaw>
+will inflate it.  The only caveat is that we don't serialize the value
+attribute.  Since coercion allows you to make the result any type you want,
+it can't reliably be serialized.  Use original value if you are serializing
+Result objects and using them to refill forms or something.
 
 =head1 AUTHOR
 

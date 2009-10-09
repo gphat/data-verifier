@@ -5,21 +5,29 @@ use MooseX::Storage;
 
 with Storage(format => 'JSON', io => 'File');
 
+has original_value => (
+    is => 'rw',
+    isa => 'Maybe[Str]',
+    predicate => 'has_original_value'
+);
+
 has reason => (
     is => 'rw',
     isa => 'Str',
     predicate => 'has_reason'
 );
 
-has value => (
-    is => 'rw',
-    isa => 'Any',
-);
-
 has valid => (
     is => 'rw',
     isa => 'Bool',
     default => 1
+);
+
+has value => (
+    traits => [ 'DoNotSerialize' ],
+    is => 'rw',
+    isa => 'Maybe[Str]',
+    clearer => 'clear_value'
 );
 
 __PACKAGE__->meta->make_immutable;
@@ -60,16 +68,35 @@ Data::Verifier::Field - Field from a Data::Verifier profile
 
 =head1 ATTRIBUTES
 
+=head2 original_value
+
+The string value of the field before any coercion.  This will survive
+serialization whereas value will not.
+
 =head2 reason
 
 If this field is invalid then this attribute should contain a "reason".  Out
 of the box it will always contain a string.  One of:
+
+=head2 valid
+
+Boolean value representing this fields validity.
+
+=head2 value
+
+The value of this field.  This will not be present if serialized, as it could
+be any value, some of which we may not know how to Serialize.  See
+C<original_value>.
 
 =over 4
 
 =item B<dependent>
 
 A dependent check failed.
+
+=item B<has_coerced_value>
+
+Predicate for the C<coerced_value> attribute.
 
 =item B<max_length>
 
@@ -86,6 +113,12 @@ The post check failed.
 =item B<type_constraint>
 
 The value did not pass the type constraint.
+
+=head1 METHODS
+
+=head2 clear_value
+
+Clears the value attribute.
 
 =head1 AUTHOR
 

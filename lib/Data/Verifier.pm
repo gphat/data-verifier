@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.10';
+our $VERSION = '0.20';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -60,7 +60,7 @@ sub verify {
         }
 
         my $field = Data::Verifier::Field->new(
-            value => $val
+            original_value => $val
         );
 
         if($fprof->{required} && !defined($val)) {
@@ -72,8 +72,6 @@ sub verify {
 
         # No sense in continuing if the value isn't defined.
         next unless defined($val);
-
-
 
         # Check min length
         if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
@@ -100,10 +98,11 @@ sub verify {
             elsif(my $coercion = $fprof->{coercion}) {
                 $val = $coercion->coerce($val);
             }
+
             unless($cons->check($val)) {
                 $field->reason('type_constraint');
                 $field->valid(0);
-                $field->value(undef);
+                $field->clear_value;
                 next; # stop processing!
             }
         }
@@ -126,7 +125,7 @@ sub verify {
             unless($dep_results->success) {
                 $field->reason('dependent');
                 $field->valid(0);
-                $field->value(undef);
+                $field->clear_value;
                 next; # stop processing!
             }
         }
@@ -153,13 +152,13 @@ sub verify {
                 try {
                     unless($results->$pc()) {
                         # If that returned false, then this field is invalid!
-                        $field->value(undef);
+                        $field->clear_value;
                         $field->reason('post_check') unless $field->has_reason;
                         $field->valid(0);
                     }
                 } catch {
                     $field->reason($_);
-                    $field->value(undef);
+                    $field->clear_value;
                     $field->valid(0);
                 }
             }
@@ -231,6 +230,7 @@ original idea) by leveraging the power of Moose's type constraint system.
     $results->is_missing('name'); # no
     $results->is_missing('sign'); # yes
 
+    $results->get_original_value('name'); # Unchanged, original value
     $results->get_value('name'); # Filtered, valid value
     $results->get_value('age');  # undefined, as it's invalid
 
