@@ -26,7 +26,7 @@ has valid => (
 has value => (
     traits => [ 'DoNotSerialize' ],
     is => 'rw',
-    isa => 'Maybe[Str]',
+    isa => 'Any',
     clearer => 'clear_value'
 );
 

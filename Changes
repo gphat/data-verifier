@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.21
+  * Fix type of Field's value attribute (Should've been an Any now that
+    it is not serialized.
+
 0.20
   * Improve Field POD
   * Add clear_value to Field and use it rather than value(undef) (which

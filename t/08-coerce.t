@@ -51,7 +51,6 @@ use Moose::Util::TypeConstraints;
     ok($results->success, 'success');
     cmp_ok($results->get_original_value('num'), 'eq', 'two', 'get_original_value');
     cmp_ok($results->get_value('num'), '==', 2, 'get_value(num) is 2');
-    cmp_ok($results->get_value('object'), 'eq', 'foo', 'get_value(foo) is stringified to foo');
 }
 
 {
