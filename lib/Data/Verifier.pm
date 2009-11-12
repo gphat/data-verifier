@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -11,7 +11,7 @@ use Try::Tiny;
 
 has 'filters' => (
     is => 'ro',
-    isa => 'ArrayRef[Str]',
+    isa => 'ArrayRef[Str|CodeRef]',
     default => sub { [] }
 );
 
@@ -175,7 +175,11 @@ sub _filter_value {
     }
 
     foreach my $f (@{ $filters }) {
-        if(Data::Verifier::Filters->can($f)) {
+
+        if(ref($f)) {
+            $value = $value->$f($value);
+        } else {
+            die "Unknown filter: $f" unless Data::Verifier::Filters->can($f);
             $value = Data::Verifier::Filters->$f($value);
         }
     }
@@ -314,8 +318,9 @@ and password2 is missing then password will be invalid.
 =item B<filters>
 
 An optional list of filters through which this specific value will be run. 
-See the documentation for L<Data::Verifier::Filters> to learn more.  This value
-may be either a string or an arrayref of strings.  
+See the documentation for L<Data::Verifier::Filters> to learn more.  This
+value my be either a scalar (string or coderef) or an arrayref of strings or
+coderefs.
 
 =item B<max_length>
 

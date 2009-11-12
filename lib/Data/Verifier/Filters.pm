@@ -14,13 +14,6 @@ sub lower {
     return lc($val);
 }
 
-
-sub upper {
-    my ($self, $val) = @_;
-
-    return uc($val);
-}
-
 sub trim {
     my ($self, $val) = @_;
 
@@ -28,6 +21,12 @@ sub trim {
     $val =~ s/^\s+//;
 
     return $val;
+}
+
+sub upper {
+    my ($self, $val) = @_;
+
+    return uc($val);
 }
 
 1;
@@ -46,7 +45,27 @@ Data::Verifier::Filters - Filters for values
     });
     $dv->get_value('name');
 
+=head1 CUSTOM FILTERS
+
+Adding a custom filter may be done by providing a coderef as one of the
+filters:
+
+  # Remove all whitespace
+  my $sub = sub { my ($val) = @_; $val =~ s/\s//g; $val }
+
+  $dv->verify({
+    name => {
+      type    => 'Str'
+        filters => [ $sub ]
+      }
+  });
+  $dv->get_value('name'); # No whitespace!
+
 =head1 FILTERS
+
+These filters are supplied free of charge.  Since they are common, it made
+sense to include them.  Patches are welcome for other filters that might be
+used commonly.
 
 =head2 collapse
 

@@ -1,5 +1,12 @@
 Revision history for Data-Verifier
 
+0.22
+  * Throw an exception when an unknown filter is provided to the filter
+    attribute.
+  * Allow coderefs to be supplied in the list of filters.
+  * Add JSON::Any dependency.
+  * Clarify documentation of filters.
+
 0.21
   * Fix type of Field's value attribute (Should've been an Any now that
     it is not serialized.

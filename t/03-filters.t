@@ -1,4 +1,5 @@
 use strict;
+use Test::Exception;
 use Test::More;
 
 use Data::Verifier;
@@ -57,5 +58,39 @@ use Data::Verifier;
     ok($results->success, 'success');
     cmp_ok($results->get_value('name'), 'eq', 'FOO BAR', 'collapse');
 }
+
+{
+    my $sub = sub { my ($val) = @_; $val =~ s/\s//g; $val; };
+    my $verifier = Data::Verifier->new(
+        filters => [ $sub ],
+        profile => {
+            name => {
+                required => 1
+            },
+        }
+    );
+
+    my $results = $verifier->verify({
+        name        => "foo bar",
+    });
+
+    ok($results->success, 'success');
+    cmp_ok($results->get_value('name'), 'eq', 'foobar', 'custom filer');
+}
+
+{
+    my $verifier = Data::Verifier->new(
+        filters => [ qw(foobazgorch) ],
+        profile => {
+            name => {
+                required => 1
+            },
+        }
+    );
+
+    throws_ok { $verifier->verify({ name        => "foo bar" }) }
+        qr/Unknown filter: foobazgorch/, 'unknown filter';
+}
+
 
 done_testing;
