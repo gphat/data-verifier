@@ -3,7 +3,7 @@ use Moose;
 use MooseX::AttributeHelpers;
 use MooseX::Storage;
 
-with Storage(format => 'JSON', io => 'File');
+with 'MooseX::Storage::Deferred';
 
 has original_value => (
     is => 'rw',

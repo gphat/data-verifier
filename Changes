@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.23
+  * Use MooseX::Storage::Deferred so that user can choose serialization style.
+    (thanks Stevan Little)
+
 0.22
   * Throw an exception when an unknown filter is provided to the filter
     attribute.
