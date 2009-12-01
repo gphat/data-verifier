@@ -17,8 +17,7 @@ sub lower {
 sub trim {
     my ($self, $val) = @_;
 
-    $val =~ s/\s+$//;
-    $val =~ s/^\s+//;
+    $val =~ s/^\s+|\s+$//g;
 
     return $val;
 }

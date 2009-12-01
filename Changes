@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.25
+  * Don't run filters on undefined values, lest your logs be spammed
+    (thanks to the most awesomest person ever, jshirley.)
+
 0.24
   * Fix typo in unknown type constraint error message.
 
