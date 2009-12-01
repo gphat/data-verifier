@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.24
+  * Fix typo in unknown type constraint error message.
+
 0.23
   * Use MooseX::Storage::Deferred so that user can choose serialization style.
     (thanks Stevan Little)

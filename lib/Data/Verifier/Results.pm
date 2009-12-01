@@ -252,12 +252,16 @@ provided.
 
 =head1 SERIALIZATION
 
-Data::Verifier uses MooseX::Storage to allow quick and easy serialization.
-So a quick call to C<freeze> will serialize this object into JSON and C<thaw>
-will inflate it.  The only caveat is that we don't serialize the value
-attribute.  Since coercion allows you to make the result any type you want,
-it can't reliably be serialized.  Use original value if you are serializing
-Result objects and using them to refill forms or something.
+Data::Verifier uses L<MooseX::Storage::Deferred> to allow quick and easy
+serialization. So a quick call to C<freeze> will serialize this object into
+JSON and C<thaw> will inflate it.  The only caveat is that we don't serialize
+the C<value> attribute.  Since coercion allows you to make the result any type
+you want, it can't reliably be serialized.  Use original value if you are
+serializing Result objects and using them to refill forms or something.
+
+  my $json = $results->freeze({ format => 'JSON' });
+  # ...
+  my $results = Data::Verifier::Results->thaw($json, { format => 'JSON' });
 
 =head1 AUTHOR
 
