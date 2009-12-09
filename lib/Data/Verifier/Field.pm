@@ -1,6 +1,5 @@
 package Data::Verifier::Field;
 use Moose;
-use MooseX::AttributeHelpers;
 use MooseX::Storage;
 
 with 'MooseX::Storage::Deferred';

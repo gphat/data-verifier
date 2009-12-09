@@ -1,18 +1,18 @@
 package Data::Verifier::Results;
+
 use Moose;
-use MooseX::AttributeHelpers;
 use MooseX::Storage;
 
 with 'MooseX::Storage::Deferred';
 
 has 'fields' => (
-    metaclass => 'Collection::Hash',
-    is => 'rw',
+    is  => 'rw',
     isa => 'HashRef',
+    traits => [ 'Hash' ],
     default => sub { {} },
-    provides => {
-        get     => 'get_field',
-        set     => 'set_field'
+    handles => {
+        get_field => 'get',
+        set_field => 'set'
     }
 );
 
@@ -179,10 +179,9 @@ or coercions.
 
 Returns the number of valid fields in this Results.
 
-=head2 values
+=head2 valids
 
-Returns a hashref of all the fields this profiled verified as the keys and
-the values that remain after verification.
+Returns a list of valid field names in the results.
 
 =head2 delete_value ($name)
 

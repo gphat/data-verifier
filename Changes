@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.26
+  * Convert to use native Moose traits
+  * Pod fixes for RT#52592
+
 0.25
   * Don't run filters on undefined values, lest your logs be spammed
     (thanks to the most awesomest person ever, jshirley.) (ed: ChangeLog
