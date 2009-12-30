@@ -21,6 +21,9 @@ use Data::Verifier;
             },
             bar => {
                 filters => 'lower'
+            },
+            baz => {
+                filters => 'flatten'
             }
         }
     );
@@ -30,7 +33,8 @@ use Data::Verifier;
         address1    => "  123 test  \n",
         address2    => "  123\n    test\t\n",
         foo         => 'Abc',
-        bar         => 'Abc'
+        bar         => 'Abc',
+        baz         => 'asd asd   asdd   '
     });
 
     ok($results->success, 'success');
@@ -41,6 +45,7 @@ use Data::Verifier;
     cmp_ok($results->get_value('address2'), 'eq', '123 test', 'trim + collapse');
     cmp_ok($results->get_value('foo'), 'eq', 'ABC', 'upper');
     cmp_ok($results->get_value('bar'), 'eq', 'abc', 'lower');
+    cmp_ok($results->get_value('baz'), 'eq', 'asdasdasdd', 'flatten');
 }
 
 {
