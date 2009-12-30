@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.27    December 30th, 2009
+  * Add flatten filter that removes all whitespace.
+
 0.26
   * Convert to use native Moose traits
   * Pod fixes for RT#52592

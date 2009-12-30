@@ -8,6 +8,13 @@ sub collapse {
     return $val;
 }
 
+sub flatten {
+    my ($self, $val) = @_;
+
+    $val =~ s/\s//g;
+    return $val;
+}
+
 sub lower {
     my ($self, $val) = @_;
 
@@ -69,6 +76,10 @@ used commonly.
 =head2 collapse
 
 Collapses all consecutive whitespace into a single space
+
+=head2 flatten
+
+Removes B<all whitespace>.
 
 =head2 lower
 

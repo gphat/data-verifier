@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
