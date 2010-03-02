@@ -5,27 +5,27 @@ use Data::Verifier;
 use Moose::Util::TypeConstraints;
 
 {
-    my %table = ( 'one' => 1, 'two' => 2, 'three' => 3 );
-
-    coerce 'Int'
-        => from 'Str'
-            => via { $table{ $_ } };
-
-
     my $verifier = Data::Verifier->new(
         profile => {
             num => {
                 type   => 'Int',
-                coerce => 1,
             },
+            name => {
+                type => 'ArrayRef[Str]'
+            },
+            place => {
+                type => 'Str'
+            }
         }
     );
 
-    my $results = $verifier->verify({ num => 'two' });
+    my $results = $verifier->verify({ num => 2, name => [ qw(foo bar) ], place => 'Hoboken' });
 
     ok($results->success, 'success');
-    cmp_ok($results->get_original_value('num'), 'eq', 'two', 'get_original_value');
+    cmp_ok($results->get_original_value('num'), 'eq', '2', 'get_original_value');
     cmp_ok($results->get_value('num'), '==', 2, 'get_value(num) is 2');
+    cmp_ok(scalar(@{ $results->get_value('name') }), '==' , 2, 'name is an arrayref');
+    cmp_ok($results->get_value('place'), 'eq', 'Hoboken');
 
     my $ser = $results->freeze({ format => 'JSON' });
 

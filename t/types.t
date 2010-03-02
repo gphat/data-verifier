@@ -25,4 +25,19 @@ use Moose::Util::TypeConstraints;
     cmp_ok($results->get_value('age2'), '==', 12, 'get_value(age2) is 12');
 }
 
+{
+    my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint('Int');
+    my $verifier = Data::Verifier->new(
+        profile => {
+            age    => {
+                type => $cons
+            },
+        }
+    );
+
+    my $results = $verifier->verify({ age => 12 });
+
+    ok($results->success, 'success: type using an instance of TypeConstraint');
+}
+
 done_testing;
