@@ -380,7 +380,9 @@ Determines if this field is required for verification.
 =item B<type>
 
 The name of the Moose type constraint to use with verifying this field's
-value.
+value. Note, this will also accept an instance of
+L<Moose::Meta::TypeConstraint>, although it may not serialize properly as a
+result.
 
 =back
 
