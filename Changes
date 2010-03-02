@@ -1,5 +1,11 @@
 Revision history for Data-Verifier
 
+0.28    February 2, 2010
+  * Document that type will allow a TypeConstraint instance and add a test
+    so if we break it, we know.
+  * Rename all the tests to not include a number, since the order is not
+    relevant.
+
 0.27    December 30th, 2009
   * Add flatten filter that removes all whitespace.
 
