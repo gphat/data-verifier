@@ -11,7 +11,7 @@ use Moose::Util::TypeConstraints;
                 type   => 'Int',
             },
             name => {
-                type => 'Str'
+                type => 'ArrayRef[Str]'
             },
             place => {
                 type => 'Str'
@@ -19,12 +19,12 @@ use Moose::Util::TypeConstraints;
         }
     );
 
-    my $results = $verifier->verify({ num => 2, name => 'foo', place => 'Hoboken' });
+    my $results = $verifier->verify({ num => 2, name => [ qw(foo bar) ], place => 'Hoboken' });
 
     ok($results->success, 'success');
     cmp_ok($results->get_original_value('num'), 'eq', '2', 'get_original_value');
     cmp_ok($results->get_value('num'), '==', 2, 'get_value(num) is 2');
-    cmp_ok($results->get_value('name'), 'eq' , 'foo', 'name is foo');
+    cmp_ok(scalar(@{ $results->get_value('name') }), '==' , 2, 'name is an arrayref');
     cmp_ok($results->get_value('place'), 'eq', 'Hoboken');
 
     my $ser = $results->freeze({ format => 'JSON' });
