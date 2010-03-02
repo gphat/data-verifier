@@ -89,7 +89,8 @@ sub verify {
 
         # Validate it
         if(defined($val) && $fprof->{type}) {
-            my $cons = Moose::Util::TypeConstraints::find_type_constraint($fprof->{type});
+            my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint($fprof->{type});
+
             die "Unknown type constraint '$fprof->{type}'" unless defined($cons);
 
             if($fprof->{coerce}) {
