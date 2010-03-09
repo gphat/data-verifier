@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.29    March 9, 2010
+  * Change type of original_value to ArrayRef|Str to handle multiple
+    values of a param.
+
 0.28    February 2, 2010
   * Document that type will allow a TypeConstraint instance and add a test
     so if we break it, we know.
