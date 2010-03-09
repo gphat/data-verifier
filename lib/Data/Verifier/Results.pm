@@ -24,6 +24,14 @@ sub get_original_value {
     return $f->original_value;
 }
 
+sub get_post_filter_value {
+    my ($self, $key) = @_;
+
+    my $f = $self->get_field($key);
+    return undef unless defined($f);
+    return $f->post_filter_value;
+}
+
 sub get_value {
     my ($self, $key) = @_;
 
@@ -190,6 +198,10 @@ Deletes the specified value from the results.
 =head2 get_original_value ($name)
 
 Get the original value for the specified field.
+
+=head2 get_post_filter_value ($name)
+
+Get the post-filter value for the specified field.
 
 =head2 get_value ($name)
 

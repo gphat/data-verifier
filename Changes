@@ -1,5 +1,12 @@
 Revision history for Data-Verifier
 
+0.29    March 9, 2010
+  * Add post_filter_value to Field and populate it with the value after
+    applying filters.
+  * Populate original_value with the value that was submitted, unchanged.
+    This is a slightly invasive change but if the field was valid then it will
+    re-filter back to the same value so it is considered safe to do.
+
 0.28    February 2, 2010
   * Document that type will allow a TypeConstraint instance and add a test
     so if we break it, we know.

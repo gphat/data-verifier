@@ -35,6 +35,8 @@ use Data::Verifier;
 
     ok($results->success, 'success');
     cmp_ok($results->get_value('name'), 'eq', 'foo bar', 'collapse');
+    cmp_ok($results->get_original_value('name'), 'eq', "foo\tbar", 'original_value');
+    cmp_ok($results->get_post_filter_value('name'), 'eq', "foo bar", 'post_filter_value');
     cmp_ok($results->get_value('address1'), 'eq', '123 test', 'trim');
     cmp_ok($results->get_value('address2'), 'eq', '123 test', 'trim + collapse');
     cmp_ok($results->get_value('foo'), 'eq', 'ABC', 'upper');

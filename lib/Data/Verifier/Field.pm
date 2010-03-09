@@ -10,6 +10,12 @@ has original_value => (
     predicate => 'has_original_value'
 );
 
+has post_filter_value => (
+    is => 'rw',
+    isa => 'Maybe[Str]',
+    predicate => 'has_post_filter_value'
+);
+
 has reason => (
     is => 'rw',
     isa => 'Str',
@@ -69,8 +75,13 @@ Data::Verifier::Field - Field from a Data::Verifier profile
 
 =head2 original_value
 
-The string value of the field before any coercion.  This will survive
-serialization whereas value will not.
+The string value of the field before any filters or coercion.  This will
+survive serialization whereas value will not.
+
+=head2 post_filter_value
+
+The string value of the field before after filters but before coercion. This
+will survive serialization whereas value will not.
 
 =head2 reason
 

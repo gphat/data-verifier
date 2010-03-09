@@ -44,6 +44,11 @@ sub verify {
 
         my $val = $params->{$key};
 
+        my $oval = $val;
+        my $field = Data::Verifier::Field->new(
+            original_value => $oval
+        );
+
         # Pass through global filters
         if($self->filters && defined $val) {
             $val = $self->_filter_value($self->filters, $val);
@@ -59,9 +64,7 @@ sub verify {
             $val = undef;
         }
 
-        my $field = Data::Verifier::Field->new(
-            original_value => $val
-        );
+        $field->post_filter_value($val);
 
         if($fprof->{required} && !defined($val)) {
             # Set required fields to undef, as they are missing
