@@ -267,9 +267,21 @@ by leveraging the aforementioned type system to keep options to a minumum.
 
 =head1 NOTES
 
+=head2 Multiple Values
+
 It should be noted that if you choose to make a param a C<Str> then validation
 will fail if multiple values are provided.  To allow multiple values you
 must use an C<ArrayRef[Str]>.
+
+=head2 Serialization
+
+Data::Verifier uses L<MooseX::Storage> to allow serialization of
+L<Data::Verifier::Results> objects.  You can use this to store results for
+validation across redirects.  Note, however, that the C<original_value>
+attribute is B<not> serialized.  Since you can coerce a value into anything
+it is not reasonable to expect to be able to serialize it.  Have a look at
+the C<original_value> or C<post_filter_value> in L<Data::Verifier::Results>
+if you want to know more.
 
 =head1 METHODS
 
