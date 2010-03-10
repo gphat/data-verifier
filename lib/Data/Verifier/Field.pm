@@ -6,7 +6,7 @@ with 'MooseX::Storage::Deferred';
 
 has original_value => (
     is => 'rw',
-    isa => 'Maybe[Str]',
+    isa => 'Maybe[Str|ArrayRef]',
     predicate => 'has_original_value'
 );
 

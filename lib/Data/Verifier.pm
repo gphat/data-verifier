@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -92,7 +92,8 @@ sub verify {
 
         # Validate it
         if(defined($val) && $fprof->{type}) {
-            my $cons = Moose::Util::TypeConstraints::find_type_constraint($fprof->{type});
+            my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint($fprof->{type});
+
             die "Unknown type constraint '$fprof->{type}'" unless defined($cons);
 
             if($fprof->{coerce}) {
