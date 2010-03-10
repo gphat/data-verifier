@@ -265,6 +265,12 @@ which is significantly more powerful than anything I could create for the
 purposes of this module.  Secondly it aims to keep a fairly simple interface
 by leveraging the aforementioned type system to keep options to a minumum.
 
+=head1 NOTES
+
+It should be noted that if you choose to make a param a C<Str> then validation
+will fail if multiple values are provided.  To allow multiple values you
+must use an C<ArrayRef[Str]>.
+
 =head1 METHODS
 
 =head2 coercion
