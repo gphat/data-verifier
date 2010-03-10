@@ -45,9 +45,14 @@ sub verify {
         my $val = $params->{$key};
 
         my $oval = $val;
-        my $field = Data::Verifier::Field->new(
-            original_value => $oval
-        );
+
+        my $field = Data::Verifier::Field->new;
+        if(ref($val)) {
+            my @values = @{ $val };
+            $field->original_value(\@values);
+        } else {
+            $field->original_value($val);
+        }
 
         # Pass through global filters
         if($self->filters && defined $val) {
@@ -64,7 +69,12 @@ sub verify {
             $val = undef;
         }
 
-        $field->post_filter_value($val);
+        if(ref($val)) {
+            my @values = @{ $val };
+            $field->post_filter_value(\@values);
+        } else {
+            $field->post_filter_value($val);
+        }
 
         if($fprof->{required} && !defined($val)) {
             # Set required fields to undef, as they are missing
@@ -173,22 +183,28 @@ sub verify {
 }
 
 sub _filter_value {
-    my ($self, $filters, $value) = @_;
+    my ($self, $filters, $values) = @_;
     if(!ref($filters)) {
         $filters = [ $filters ];
+    }
+    if(!ref($values)) {
+        $values = [ $values ];
     }
 
     foreach my $f (@{ $filters }) {
 
-        if(ref($f)) {
-            $value = $value->$f($value);
-        } else {
-            die "Unknown filter: $f" unless Data::Verifier::Filters->can($f);
-            $value = Data::Verifier::Filters->$f($value);
+        foreach my $value (@{ $values }) {
+            if(ref($f)) {
+                $value = $value->$f($value);
+            } else {
+                die "Unknown filter: $f" unless Data::Verifier::Filters->can($f);
+                $value = Data::Verifier::Filters->$f($value);
+            }
         }
     }
 
-    return $value;
+    # Return an arrayref if we have multiple values or a scalar if we have one
+    scalar(@{ $values }) == 1 ? $values->[0] : $values;
 }
 
 __PACKAGE__->meta->make_immutable;

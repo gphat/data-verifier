@@ -12,7 +12,7 @@ has original_value => (
 
 has post_filter_value => (
     is => 'rw',
-    isa => 'Maybe[Str]',
+    isa => 'Maybe[Str|ArrayRef]',
     predicate => 'has_post_filter_value'
 );
 
