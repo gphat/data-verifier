@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -277,7 +277,7 @@ must use an C<ArrayRef[Str]>.
 
 Data::Verifier uses L<MooseX::Storage> to allow serialization of
 L<Data::Verifier::Results> objects.  You can use this to store results for
-validation across redirects.  Note, however, that the C<original_value>
+validation across redirects.  Note, however, that the C<value>
 attribute is B<not> serialized.  Since you can coerce a value into anything
 it is not reasonable to expect to be able to serialize it.  Have a look at
 the C<original_value> or C<post_filter_value> in L<Data::Verifier::Results>

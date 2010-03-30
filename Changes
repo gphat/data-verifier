@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.30    March 30, 2010
+  * Fix accidental warning about the wrong field.  We DO serialize original_value!
+
 0.29    March 10, 2010
   * Add post_filter_value to Field and populate it with the value after
     applying filters.
