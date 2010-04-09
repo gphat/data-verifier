@@ -66,6 +66,8 @@ use Data::Verifier;
     ok($results->is_valid('name'), 'name is valid');
     cmp_ok($results->get_value('name'), 'eq', 'foo', 'get_value');
     ok($results->is_valid('age'), 'age is valid');
+    my %valids = $results->valid_values;
+    is_deeply(\%valids, { name => 'foo', age => 0 }, 'valid_values');
 }
 
 

@@ -130,6 +130,12 @@ sub valid_count {
     return scalar($self->valids);
 }
 
+sub valid_values {
+    my ($self) = @_;
+
+    return map { $_ => $self->get_value($_) } $self->valids;
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;
@@ -221,6 +227,11 @@ Returns true if the field is valid.
 =head2 valids
 
 Returns a list of keys for which we have valid values.
+
+=head2 valid_values
+
+Returns a hash of valid values in the form of C<name => value>.  This is a
+convenient method for instantiating Moose objects from your verified data.
 
 =head1 INVALID FIELDS
 

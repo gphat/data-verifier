@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.31    April 9, 2010
+  * Add valid_values to Results class
+
 0.30    March 30, 2010
   * Fix accidental warning about the wrong field.  We DO serialize original_value!
 
