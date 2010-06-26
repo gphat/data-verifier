@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.32    June 25, 2010
+  * POD fix
+
 0.31    April 9, 2010
   * Add valid_values to Results class
 

@@ -263,7 +263,7 @@ original idea) by leveraging the power of Moose's type constraint system.
 Data::Verifier firstly intends to leverage Moose's type constraint system,
 which is significantly more powerful than anything I could create for the
 purposes of this module.  Secondly it aims to keep a fairly simple interface
-by leveraging the aforementioned type system to keep options to a minumum.
+by leveraging the aforementioned type system to keep options to a minimum.
 
 =head1 NOTES
 
