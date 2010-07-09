@@ -17,6 +17,7 @@ MANIFEST			This list of files
 META.yml
 README
 t/array.t
+t/coderef.t
 t/coerce.t
 t/dependents.t
 t/filters.t
