@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.32    Jul 9, 2010
+  * Match what the documentation says and allow the value of "filters" to be
+    a single coderef or an array of coderefs.  (RT #59211, Thanks Ron Savage!)
+
 0.31    April 9, 2010
   * Add valid_values to Results class
 

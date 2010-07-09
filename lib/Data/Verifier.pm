@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -125,7 +125,7 @@ sub verify {
         my $dependent = $fprof->{dependent};
         my $dep_results;
         if($dependent) {
-            # Create a new verifier for use withe the dependents
+            # Create a new verifier for use with the dependents
             my $dep_verifier = Data::Verifier->new(
                 filters => $self->filters,
                 profile => $dependent
@@ -184,7 +184,7 @@ sub verify {
 
 sub _filter_value {
     my ($self, $filters, $values) = @_;
-    if(!ref($filters)) {
+    if(ref($filters) ne 'ARRAY') {
         $filters = [ $filters ];
     }
     if(!ref($values)) {
