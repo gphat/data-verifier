@@ -1,12 +1,13 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
 use Moose::Util::TypeConstraints;
+use Scalar::Util qw(blessed);
 use Try::Tiny;
 
 has 'filters' => (
@@ -36,13 +37,22 @@ sub verify {
     my $results = Data::Verifier::Results->new;
     my $profile = $self->profile;
 
+    my $blessed_params = blessed($params);
+
     my @post_checks = ();
     foreach my $key (keys(%{ $profile })) {
 
         # Get the profile part that is pertinent to this field
         my $fprof = $profile->{$key};
 
-        my $val = $params->{$key};
+
+        my $val = do {
+            if($blessed_params) {
+                $params->can($key) ? $params->$key() : undef;
+            } else {
+                $params->{$key};
+            }
+        };
 
         my $oval = $val;
 
@@ -242,9 +252,14 @@ original idea) by leveraging the power of Moose's type constraint system.
         }
     );
 
+    # Pass in a hash of data
     my $results = $dv->verify({
         name => 'Cory', age => 'foobar'
     });
+
+    # Also works with objects!
+    my $object = My::Object->new(name => 'Cory', age => 'foobar');
+    my $results = $dv->verify($object);
 
     $results->success; # no
 
@@ -282,6 +297,14 @@ attribute is B<not> serialized.  Since you can coerce a value into anything
 it is not reasonable to expect to be able to serialize it.  Have a look at
 the C<original_value> or C<post_filter_value> in L<Data::Verifier::Results>
 if you want to know more.
+
+=head2 Verifying Objects
+
+Data::Verifier can verify data encapsulated in objects too. Everything works
+the way that it does for hash references.  Each key in the profile is used as
+the name of a method to call on the object. In order to maintain consistency
+with the hash reference case, missing methods pass an 'undef' value into the
+verification process.
 
 =head1 METHODS
 

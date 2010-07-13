@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.34    Jul 13, 2010
+  * Allow the data passed into verify to be an object rather than just a
+    HashRef (George Hartzell)
+
 0.33    Jul 9, 2010
   * Match what the documentation says and allow the value of "filters" to be
     a single coderef or an array of coderefs.  (RT #59211, Thanks Ron Savage!)

@@ -23,6 +23,7 @@ t/dependents.t
 t/filters.t
 t/lengths.t
 t/load.t
+t/object.t
 t/post-check.t
 t/result-merge.t
 t/simple.t
