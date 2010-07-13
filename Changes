@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.35
+  * Point out that D:V stops processing on the first failure
+
 0.34    Jul 13, 2010
   * Allow the data passed into verify to be an object rather than just a
     HashRef (George Hartzell)

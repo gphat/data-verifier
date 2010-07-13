@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -287,6 +287,13 @@ by leveraging the aforementioned type system to keep options to a minimum.
 It should be noted that if you choose to make a param a C<Str> then validation
 will fail if multiple values are provided.  To allow multiple values you
 must use an C<ArrayRef[Str]>.
+
+=head2 Stops on First Failure
+
+Data::Verifier stops checking a field (not all, just the failed one) if it
+fails any of it's constraints. Consult the Execution Order below to ascertain
+the order.  For example, if a field exceeds it's max length then it will not
+be checked against it's type constraint.
 
 =head2 Serialization
 
