@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -57,7 +57,7 @@ sub verify {
         my $oval = $val;
 
         my $field = Data::Verifier::Field->new;
-        if(ref($val)) {
+        if(ref($val) eq 'ARRAY') {
             my @values = @{ $val };
             $field->original_value(\@values);
         } else {
