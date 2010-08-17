@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+0.37
+  * Don't dereference ArrayRef values with a single member. (Dennis Schön,
+    RT #60425)
+
 0.36
   * Don't die by attempting to cram a non-arrayref-ref into an array-ref.
 

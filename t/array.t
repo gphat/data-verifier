@@ -13,6 +13,26 @@ use Data::Verifier;
         }
     );
 
+    my $results = $verifier->verify({ name => [ 'foo' ] });
+
+    ok($results->success, 'success');
+    cmp_ok($results->valid_count, '==', 1, '1 valid');
+    cmp_ok($results->invalid_count, '==', 0, 'none invalid');
+    cmp_ok($results->missing_count, '==', 0, 'none missing');
+    is_deeply($results->get_value('name'), [ 'foo' ], 'got my name back');
+    ok($results->is_valid('name'), 'name is valid');
+}
+
+{
+    my $verifier = Data::Verifier->new(
+        profile => {
+            name    => {
+                required => 1,
+                type => 'ArrayRef[Str]'
+            }
+        }
+    );
+
     my $results = $verifier->verify({ name => [ 'foo', 'bar' ], bar => 'reject me' });
 
     ok($results->success, 'success');

@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -194,10 +194,13 @@ sub verify {
 
 sub _filter_value {
     my ($self, $filters, $values) = @_;
+
+    my $created_ref = 0;
     if(ref($filters) ne 'ARRAY') {
         $filters = [ $filters ];
     }
     if(!ref($values)) {
+        $created_ref = 1;
         $values = [ $values ];
     }
 
@@ -214,7 +217,7 @@ sub _filter_value {
     }
 
     # Return an arrayref if we have multiple values or a scalar if we have one
-    scalar(@{ $values }) == 1 ? $values->[0] : $values;
+    return $created_ref ? $values->[0] : $values;
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -506,6 +509,8 @@ J. Shirley
 Stevan Little
 
 George Hartzell
+
+Dennis Schön
 
 =head1 COPYRIGHT & LICENSE
 
