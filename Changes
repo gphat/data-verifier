@@ -1,5 +1,12 @@
 Revision history for Data-Verifier
 
+0.38
+  * Add is_wrong predicate to Results object
+  * Document the internals of Results
+  * Add a has_field to Results
+  * is_missing no longer returns true for arbitrary field names
+  * Add many more tests to the default case
+
 0.37
   * Don't dereference ArrayRef values with a single member. (Dennis Schön,
     RT #60425)

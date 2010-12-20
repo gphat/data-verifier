@@ -12,7 +12,8 @@ has 'fields' => (
     default => sub { {} },
     handles => {
         get_field => 'get',
-        set_field => 'set'
+        set_field => 'set',
+		has_field => 'exists'
     }
 );
 
@@ -52,6 +53,8 @@ sub is_invalid {
 sub is_missing {
     my ($self, $field) = @_;
 
+	return 0 unless $self->has_field($field);
+
     my $f = $self->get_field($field);
 
     return 1 unless defined($f);
@@ -65,6 +68,20 @@ sub is_valid {
 
     return 0 unless defined($f);
     return $f->valid ? 1 : 0;
+}
+
+sub is_wrong {
+    my ($self, $field) = @_;
+
+    # return true if it is missing
+    return 1 if $self->is_missing($field);
+    # return 0 if it's not present at all
+    return 0 if !defined($self->get_field($field));
+    # lastly, check that it's valid
+    return 1 if $self->is_invalid($field);
+
+    # Nope, must be fine
+    return 0;
 }
 
 sub merge {
@@ -183,6 +200,12 @@ Data::Verifier::Results - Results of a Data::Verifier
 
 Returns true or false based on if the verification's success.
 
+=head2 is_wrong ($name)
+
+Returns true if the value was required and is missing or if the value did not
+pass it's type constraint.  This is a one-stop method for determining if the
+field in question is "wrong".
+
 =head1 VALUES
 
 The values present in the result are the filtered, valid values.  These may
@@ -267,6 +290,11 @@ Returns the count of missing fields in this result.
 
 Gets the field object, if it exists, for the name provided.
 
+=head2 has_field ($name)
+
+Returns true if the name in question is part of this result object.  This
+should be true for any field that was in the profile.
+
 =head2 set_field ($name)
 
 Sets the field object (you shouldn't be doing this directly) for the name
@@ -284,6 +312,19 @@ serializing Result objects and using them to refill forms or something.
   my $json = $results->freeze({ format => 'JSON' });
   # ...
   my $results = Data::Verifier::Results->thaw($json, { format => 'JSON' });
+
+=head1 INTERNALS
+
+This module has a hashref attribute C<fields>.  The keys are the names of the
+fields from the profile.  The keys are are either C<undef> or a
+L<Data::Verifier::Field> object.
+
+The B<only> keys that will be populated in the Result object are those that were
+listed in the profile.  Any arbitrary fields I<will not> be part of the result
+object, as they were not part of the profile.  You should not query the result
+object for the state of any arbitrary fields.  This will not throw any
+exceptions, but it may not return the results you want if you query for
+arbitrary field names.
 
 =head1 AUTHOR
 
