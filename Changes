@@ -1,5 +1,8 @@
 Revision history for Data-Verifier
 
+0.39 Jan 3, 2010
+  * Add JSON::Any to test_requires
+
 0.38
   * Add is_wrong predicate to Results object
   * Document the internals of Results
