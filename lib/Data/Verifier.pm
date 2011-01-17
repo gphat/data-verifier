@@ -1,7 +1,7 @@
 package Data::Verifier;
 use Moose;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
@@ -432,7 +432,7 @@ must be equal to the other, like an email confirmation:
 
   $results->success; # false
   $results->is_valid('email'); # false
-  $results->is_valid('email2); # true, as it has no post_check
+  $results->is_valid('email2'); # true, as it has no post_check
 
 In the above example, C<success> will return false, because the value of
 C<email> does not match the value of C<email2>.  C<is_valid> will return false
