@@ -49,6 +49,7 @@ ok($results->is_invalid('rank'), 'rank invalid');
 cmp_ok($results->get_value('location'), 'eq', 'TN', 'get_value location');
 cmp_ok($results->get_value('serial'), 'eq', 'abc123', 'get_value serial');
 
+is_deeply( [$results->get_values('location', 'serial')], ['TN', 'abc123'], '"get_values" method');
 
 
 done_testing;
