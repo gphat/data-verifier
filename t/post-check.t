@@ -6,6 +6,13 @@ use Data::Verifier;
 {
     my $verifier = Data::Verifier->new(
         profile => {
+            name => {
+                post_check => sub {
+                    my $r = shift;
+                    return $r->get_value('name') eq 'Bob';
+                }
+            },
+
             password    => {
                 required => 1,
                 post_check => sub {
@@ -22,13 +29,21 @@ use Data::Verifier;
     my $results = $verifier->verify({ password => 'foo', password2 => 'foo' });
 
     ok($results->success, 'success');
-    cmp_ok($results->valid_count, '==', 2, '2 valid');
+    cmp_ok($results->valid_count, '==', 3, '3 valid');
     cmp_ok($results->invalid_count, '==', 0, 'none invalid');
     cmp_ok($results->missing_count, '==', 0, 'none missing');
     ok($results->is_valid('password'), 'password is valid');
     ok($results->is_valid('password2'), 'password2 is valid');
     cmp_ok($results->get_value('password'), 'eq', 'foo', 'get_value password');
     cmp_ok($results->get_value('password2'), 'eq', 'foo', 'get_value password2');
+    $results = $verifier->verify({ name => 'Bob', password => 'foo', password2 => 'foo' });
+
+    ok($results->success, 'success');
+    $results = $verifier->verify({ name => 'bob', password => 'foo', password2 => 'foo' });
+
+    ok(!$results->success, 'success');
+    ok(!$results->is_valid('name'), 'name is valid');
+
 }
 
 {
