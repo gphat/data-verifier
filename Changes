@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+
+0.41      2011-01-23 09:28:00 America/Chicago
   * Use Dist::Zilla
   * Fix POD error
   * Add get_values to Results (Jason May)
