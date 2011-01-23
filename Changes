@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+
+0.43 Jan 23 2011
   * Various fixes to the synopses
   * More dzil love
 
