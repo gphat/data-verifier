@@ -1,0 +1,289 @@
+# NAME
+
+Data::Verifier - Profile based data verification with Moose type constraints.
+
+# DESCRIPTION
+
+Data::Verifier allows you verify data (such as web forms, which was the
+original idea) by leveraging the power of Moose's type constraint system.
+
+# SYNOPSIS
+
+    use Data::Verifier;
+
+    my $dv = Data::Verifier->new(
+        filters => [ qw(trim) ],
+        profile => {
+            name => {
+                required    => 1,
+                type        => 'Str',
+               filters     => [ qw(collapse) ]
+            },
+            age  => {
+                type        => 'Int'
+            },
+            sign => {
+                required    => 1,
+                type        => 'Str'
+            }
+        }
+    );
+
+    # Pass in a hash of data
+    my $results = $dv->verify({
+        name => 'Cory', age => 'foobar'
+    });
+
+    $results->success; # no
+
+    $results->is_invalid('name'); # no
+    $results->is_invalid('age');  # yes
+
+    $results->is_missing('name'); # no
+    $results->is_missing('sign'); # yes
+
+    $results->get_original_value('name'); # Unchanged, original value
+    $results->get_value('name'); # Filtered, valid value
+    $results->get_value('age');  # undefined, as it's invalid
+
+# MOTIVATION
+
+Data::Verifier firstly intends to leverage Moose's type constraint system,
+which is significantly more powerful than anything I could create for the
+purposes of this module.  Secondly it aims to keep a fairly simple interface
+by leveraging the aforementioned type system to keep options to a minimum.
+
+# NOTES
+
+## Multiple Values
+
+It should be noted that if you choose to make a param a `Str` then validation
+will fail if multiple values are provided.  To allow multiple values you
+must use an `ArrayRef[Str]`.
+
+## Stops on First Failure
+
+Data::Verifier stops checking a field (not all, just the failed one) if it
+fails any of it's constraints. Consult the Execution Order below to ascertain
+the order.  For example, if a field exceeds it's max length then it will not
+be checked against it's type constraint.
+
+## Serialization
+
+Data::Verifier uses [MooseX::Storage](http://search.cpan.org/perldoc?MooseX::Storage) to allow serialization of
+[Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) objects.  You can use this to store results for
+validation across redirects.  Note, however, that the `value`
+attribute is __not__ serialized.  Since you can coerce a value into anything
+it is not reasonable to expect to be able to serialize it.  Have a look at
+the `original_value` or `post_filter_value` in [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results)
+if you want to know more.
+
+## Verifying Objects
+
+Data::Verifier can verify data encapsulated in objects too. Everything works
+the way that it does for hash references.  Each key in the profile is used as
+the name of a method to call on the object. In order to maintain consistency
+with the hash reference case, missing methods pass an 'undef' value into the
+verification process.
+
+# METHODS
+
+## coercion
+
+Define a coercion to use for verification.  This will not define a global
+Moose type coercion, but is instead just a single coercion to apply to a 
+specific entity.
+
+    my $verifier = Data::Verifier->new(
+        profile => {
+            a_string => {
+                type     => 'Str',
+                coercion => Data::Verifier::coercion(
+                    from => 'Int', 
+                        via => sub { (qw[ one two three ])[ ($_ - 1) ] }
+                ),
+            },
+        }
+    );
+
+Now, after `a_string` is processed by Data::Verifier, the results will 
+return the coerced and validated value.
+
+# ATTRIBUTES
+
+## filters
+
+An optional arrayref of filter names through which __all__ values will be
+passed.
+
+## profile
+
+The profile is a hashref.  Each value you'd like to verify is a key.  The
+values specify all the options to use with the field.  The available options
+are:
+
+- __coerce__
+
+If true then the value will be given an opportunity to coerce via Moose's
+type system.  If this is set, coercion will be ignored.
+
+- __coercion__
+
+Set this attribute to the coercion defined for this type.  If __coerce__ is 
+set this attribute will be ignored.  See the `coercion` method above.
+
+- __dependent__
+
+Allows a set of fields to be specifid as dependents of this one.  The argument
+for this key is a full-fledged profile as you would give to the profile key:
+
+  my $verifier = Data::Verifier->new(
+      profile => {
+          password    => {
+              dependent => {
+                  password2 => {
+                      required => 1,
+                  }
+              }
+          }
+      }
+  );
+
+In the above example `password` is not required.  If it is provided then
+password2 must also be provided.  If any depedents of a field are missing or
+invalid then that field is __invalid__.  In our example if password is provided
+and password2 is missing then password will be invalid.
+
+- __filters__
+
+An optional list of filters through which this specific value will be run. 
+See the documentation for [Data::Verifier::Filters](http://search.cpan.org/perldoc?Data::Verifier::Filters) to learn more.  This
+value my be either a scalar (string or coderef) or an arrayref of strings or
+coderefs.
+
+- __max_length__
+
+An optional length which the value may not exceed.
+
+- __min_length__
+
+An optional length which the value may not be less.
+
+- __post_check__
+
+The `post_check` key takes a subref and, after all verification has finished,
+executes the subref with the results of the verification as it's only argument.
+The subref's return value determines if the field to which the post_check
+belongs is invalid.  A typical example would be when the value of one field
+must be equal to the other, like an email confirmation:
+
+  my $verifier = Data::Verifier->new(
+      profile => {
+          email    => {
+              required => 1,
+              dependent => {
+                  email2 => {
+                      required => 1,
+                  }
+              },
+              post_check => sub {
+                  my $r = shift;
+                  return $r->get_value('email') eq $r->get_value('email2');
+              }
+          },
+      }
+  );
+
+  my $results = $verifier->verify({
+      email => 'foo@example.com', email2 => 'foo2@example.com'
+  });
+
+  $results->success; # false
+  $results->is_valid('email'); # false
+  $results->is_valid('email2'); # true, as it has no post_check
+
+In the above example, `success` will return false, because the value of
+`email` does not match the value of `email2`.  `is_valid` will return false
+for `email` but true for `email2`, since nothing specifically invalidated it.
+In this example you should rely on the `email` field, as `email2` carries no
+significance but to confirm `email`.
+
+__Note about post_check and exceptions__: If have a more complex post_check
+that could fail in multiple ways, you can `die` in your post_check coderef
+and the exception will be stored in the fields `reason` attribute.
+
+- __required__
+
+Determines if this field is required for verification.
+
+- __type__
+
+The name of the Moose type constraint to use with verifying this field's
+value. Note, this will also accept an instance of
+[Moose::Meta::TypeConstraint](http://search.cpan.org/perldoc?Moose::Meta::TypeConstraint), although it may not serialize properly as a
+result.
+
+# EXECUTION ORDER
+
+It may be important to understand the order in which the various steps of
+verification are performed:
+
+- Global Filters
+
+Any global filters in the profile are executed.
+
+- Per-Field Filters
+
+Any per-field filters are executed.
+
+- Empty String Check
+
+If the value of the field is an empty string then it is changed to an undef.
+
+- Required Check
+
+The parameter must now be defined if it is set as required.
+
+- Length Check
+
+Minimum then maximum length is checked.
+
+- Type Check (w/Coercion)
+
+At this point the type will be checked after an optional coercion.
+
+- Depedency Checks
+
+If this field has dependents then those will not be processed.
+
+- Post Check
+
+If the field has a post check it will now be executed.
+
+# AUTHOR
+
+Cory G Watson, `<gphat at cpan.org>`
+
+# CONTRIBUTORS
+
+Mike Eldridge
+
+George Hartzell
+
+Stevan Little
+
+Jason May
+
+Dennis Schön
+
+J. Shirley
+
+# COPYRIGHT & LICENSE
+
+Copyright 2009 Cold Hard Code, LLC
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
