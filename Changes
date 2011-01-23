@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Add Git::Commit to make the Changes not be stale
+  * Make JSON::XS a dep to get tests passing (Thanks ANDK!)
 
 0.41      2011-01-23 09:28:00 America/Chicago
   * Use Dist::Zilla
