@@ -53,9 +53,9 @@ Data::Verifier::Field - Field from a Data::Verifier profile
             required    => 1,
             type        => 'Str',
             filters     => [ qw(collapse trim) ]
-        }
+        },
         age  => {
-            type        => 'Int';
+            type        => 'Int'
         },
         sign => {
             required    => 1,
@@ -68,7 +68,7 @@ Data::Verifier::Field - Field from a Data::Verifier profile
     });
 
 
-    my $field = $results->get_field('name);
+    my $field = $results->get_field('name');
     say $field->value;
 
 =head1 ATTRIBUTES

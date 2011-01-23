@@ -228,23 +228,25 @@ __END__
 
 Data::Verifier - Profile based data verification with Moose type constraints.
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
 Data::Verifier allows you verify data (such as web forms, which was the
 original idea) by leveraging the power of Moose's type constraint system.
 
+=head1 SYNOPSIS
+
     use Data::Verifier;
 
     my $dv = Data::Verifier->new(
-        filters => [ qw(trim) ]
+        filters => [ qw(trim) ],
         profile => {
             name => {
                 required    => 1,
                 type        => 'Str',
-                filters     => [ qw(collapse) ]
-            }
+               filters     => [ qw(collapse) ]
+            },
             age  => {
-                type        => 'Int';
+                type        => 'Int'
             },
             sign => {
                 required    => 1,
@@ -257,10 +259,6 @@ original idea) by leveraging the power of Moose's type constraint system.
     my $results = $dv->verify({
         name => 'Cory', age => 'foobar'
     });
-
-    # Also works with objects!
-    my $object = My::Object->new(name => 'Cory', age => 'foobar');
-    my $results = $dv->verify($object);
 
     $results->success; # no
 

@@ -43,13 +43,17 @@ Data::Verifier::Filters - Filters for values
 
 =head1 SYNOPSIS
 
-    $dv->verify({
+    use Data::Verifier;
+
+    my $dv = Data::Verifier->new(profile => {
         name => {
-            type    => 'Str'
+            type    => 'Str',
             filters => [ qw(collapse trim) ]
         }
     });
-    $dv->get_value('name');
+
+    $dv->verify({ name => ' foo  bar  '});
+    $dv->get_value('name'); # 'foo bar'
 
 =head1 CUSTOM FILTERS
 

@@ -178,9 +178,9 @@ Data::Verifier::Results - Results of a Data::Verifier
             required    => 1,
             type        => 'Str',
             filters     => [ qw(collapse trim) ]
-        }
+        },
         age  => {
-            type        => 'Int';
+            type        => 'Int'
         },
         sign => {
             required    => 1,
