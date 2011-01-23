@@ -3,6 +3,7 @@ Revision history for Data-Verifier
 {{$NEXT}}
   * Use Dist::Zilla
   * Fix POD error
+  * Add get_values to Results (Jason May)
 
 0.40 Jan 17, 2010
   * Fix typo in POD (Jason May)

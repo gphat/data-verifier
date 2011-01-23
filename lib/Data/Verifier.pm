@@ -502,13 +502,17 @@ Cory G Watson, C<< <gphat at cpan.org> >>
 
 =head1 CONTRIBUTORS
 
-J. Shirley
-
-Stevan Little
+Mike Eldridge
 
 George Hartzell
 
+Stevan Little
+
+Jason May
+
 Dennis Schön
+
+J. Shirley
 
 =head1 COPYRIGHT & LICENSE
 

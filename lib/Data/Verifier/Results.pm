@@ -41,6 +41,12 @@ sub get_value {
     return $f->value;
 }
 
+sub get_values {
+    my ($self, @keys) = @_;
+
+    return map { $self->get_value($_) } @keys;
+}
+
 sub is_invalid {
     my ($self, $field) = @_;
 
@@ -236,6 +242,11 @@ Get the post-filter value for the specified field.
 
 Returns the value for the specified field.  The value may be different from
 the one originally supplied due to filtering or coercion.
+
+=head2 get_values (@names)
+
+Same concept as C<get_value> but will return a list of respective values in
+the same order in which you provide the names.
 
 =head2 value_count
 
