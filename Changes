@@ -1,5 +1,9 @@
 Revision history for Data-Verifier
 
+{{$NEXT}}
+  * Use Dist::Zilla
+  * Fix POD error
+
 0.40 Jan 17, 2010
   * Fix typo in POD (Jason May)
 
