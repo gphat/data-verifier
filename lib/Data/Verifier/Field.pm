@@ -124,6 +124,8 @@ The post check failed.
 
 The value did not pass the type constraint.
 
+=back
+
 =head1 METHODS
 
 =head2 clear_value
