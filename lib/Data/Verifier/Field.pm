@@ -45,6 +45,34 @@ has post_filter_value => (
 If this field is invalid then this attribute should contain a "reason".  Out
 of the box it will always contain a string.  One of:
 
+=over 4
+
+=item B<dependent>
+
+A dependent check failed.
+
+=item B<has_coerced_value>
+
+Predicate for the C<coerced_value> attribute.
+
+=item B<max_length>
+
+The value was larger than the field's max length.
+
+=item B<min_length>
+
+The value was shorter than the field's min length.
+
+=item B<post_check>
+
+The post check failed.
+
+=item B<type_constraint>
+
+The value did not pass the type constraint.
+
+=back
+
 =method has_reason
 
 Predicate that returns true if this field has a reason.
@@ -74,34 +102,6 @@ has valid => (
 The value of this field.  This will not be present if serialized, as it could
 be any value, some of which we may not know how to Serialize.  See
 C<original_value>.
-
-=over 4
-
-=item B<dependent>
-
-A dependent check failed.
-
-=item B<has_coerced_value>
-
-Predicate for the C<coerced_value> attribute.
-
-=item B<max_length>
-
-The value was larger than the field's max length.
-
-=item B<min_length>
-
-The value was shorter than the field's min length.
-
-=item B<post_check>
-
-The post check failed.
-
-=item B<type_constraint>
-
-The value did not pass the type constraint.
-
-=back
 
 =method clear_value
 
@@ -146,6 +146,11 @@ __END__
 
 
     my $field = $results->get_field('name');
-    say $field->value;
+    print $field->value;
+
+=head1 DESCRIPTION
+
+Data::Verifier::Field provides all post-verification information on a given
+field.
 
 =cut
