@@ -2,10 +2,9 @@
 
 Data::Verifier - Profile based data verification with Moose type constraints.
 
-# DESCRIPTION
+# VERSION
 
-Data::Verifier allows you verify data (such as web forms, which was the
-original idea) by leveraging the power of Moose's type constraint system.
+version 0.44
 
 # SYNOPSIS
 
@@ -46,70 +45,12 @@ original idea) by leveraging the power of Moose's type constraint system.
     $results->get_value('name'); # Filtered, valid value
     $results->get_value('age');  # undefined, as it's invalid
 
-# MOTIVATION
+# DESCRIPTION
 
-Data::Verifier firstly intends to leverage Moose's type constraint system,
-which is significantly more powerful than anything I could create for the
-purposes of this module.  Secondly it aims to keep a fairly simple interface
-by leveraging the aforementioned type system to keep options to a minimum.
+Data::Verifier allows you verify data (such as web forms, which was the
+original idea) by leveraging the power of Moose's type constraint system.
 
-# NOTES
-
-## Multiple Values
-
-It should be noted that if you choose to make a param a `Str` then validation
-will fail if multiple values are provided.  To allow multiple values you
-must use an `ArrayRef[Str]`.
-
-## Stops on First Failure
-
-Data::Verifier stops checking a field (not all, just the failed one) if it
-fails any of it's constraints. Consult the Execution Order below to ascertain
-the order.  For example, if a field exceeds it's max length then it will not
-be checked against it's type constraint.
-
-## Serialization
-
-Data::Verifier uses [MooseX::Storage](http://search.cpan.org/perldoc?MooseX::Storage) to allow serialization of
-[Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) objects.  You can use this to store results for
-validation across redirects.  Note, however, that the `value`
-attribute is __not__ serialized.  Since you can coerce a value into anything
-it is not reasonable to expect to be able to serialize it.  Have a look at
-the `original_value` or `post_filter_value` in [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results)
-if you want to know more.
-
-## Verifying Objects
-
-Data::Verifier can verify data encapsulated in objects too. Everything works
-the way that it does for hash references.  Each key in the profile is used as
-the name of a method to call on the object. In order to maintain consistency
-with the hash reference case, missing methods pass an 'undef' value into the
-verification process.
-
-# METHODS
-
-## coercion
-
-Define a coercion to use for verification.  This will not define a global
-Moose type coercion, but is instead just a single coercion to apply to a 
-specific entity.
-
-    my $verifier = Data::Verifier->new(
-        profile => {
-            a_string => {
-                type     => 'Str',
-                coercion => Data::Verifier::coercion(
-                    from => 'Int', 
-                        via => sub { (qw[ one two three ])[ ($_ - 1) ] }
-                ),
-            },
-        }
-    );
-
-Now, after `a_string` is processed by Data::Verifier, the results will 
-return the coerced and validated value.
-
-# ATTRIBUTES
+# Attributes
 
 ## filters
 
@@ -223,6 +164,66 @@ value. Note, this will also accept an instance of
 [Moose::Meta::TypeConstraint](http://search.cpan.org/perldoc?Moose::Meta::TypeConstraint), although it may not serialize properly as a
 result.
 
+# METHODS
+
+## coercion
+
+Define a coercion to use for verification.  This will not define a global
+Moose type coercion, but is instead just a single coercion to apply to a 
+specific entity.
+
+    my $verifier = Data::Verifier->new(
+        profile => {
+            a_string => {
+                type     => 'Str',
+                coercion => Data::Verifier::coercion(
+                    from => 'Int', 
+                        via => sub { (qw[ one two three ])[ ($_ - 1) ] }
+                ),
+            },
+        }
+    );
+
+# MOTIVATION
+
+Data::Verifier firstly intends to leverage Moose's type constraint system,
+which is significantly more powerful than anything I could create for the
+purposes of this module.  Secondly it aims to keep a fairly simple interface
+by leveraging the aforementioned type system to keep options to a minimum.
+
+# NOTES
+
+## Multiple Values
+
+It should be noted that if you choose to make a param a `Str` then validation
+will fail if multiple values are provided.  To allow multiple values you
+must use an `ArrayRef[Str]`.
+
+## Stops on First Failure
+
+Data::Verifier stops checking a field (not all, just the failed one) if it
+fails any of it's constraints. Consult the Execution Order below to ascertain
+the order.  For example, if a field exceeds it's max length then it will not
+be checked against it's type constraint.
+
+## Serialization
+
+Data::Verifier uses [MooseX::Storage](http://search.cpan.org/perldoc?MooseX::Storage) to allow serialization of
+[Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) objects.  You can use this to store results for
+validation across redirects.  Note, however, that the `value`
+attribute is __not__ serialized.  Since you can coerce a value into anything
+it is not reasonable to expect to be able to serialize it.  Have a look at
+the `original_value` or `post_filter_value` in [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results)
+if you want to know more.
+
+## Verifying Objects
+
+Data::Verifier can verify data encapsulated in objects too. Everything works
+the way that it does for hash references.  Each key in the profile is used as
+the name of a method to call on the object. In order to maintain consistency
+with the hash reference case, missing methods pass an 'undef' value into the
+verification process.
+
 # EXECUTION ORDER
 
 It may be important to understand the order in which the various steps of
@@ -260,10 +261,6 @@ If this field has dependents then those will not be processed.
 
 If the field has a post check it will now be executed.
 
-# AUTHOR
-
-Cory G Watson, `<gphat at cpan.org>`
-
 # CONTRIBUTORS
 
 Mike Eldridge
@@ -278,12 +275,13 @@ Dennis Schön
 
 J. Shirley
 
-# COPYRIGHT & LICENSE
+# AUTHOR
 
-Copyright 2009 Cold Hard Code, LLC
+Cory G Watson <gphat@cpan.org>
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+# COPYRIGHT AND LICENSE
 
-See http://dev.perl.org/licenses/ for more information.
+This software is copyright (c) 2011 by Cold Hard Code, LLC.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
