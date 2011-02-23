@@ -163,6 +163,12 @@ sub is_wrong {
     return 0;
 }
 
+=method merge ($other_results_object)
+
+Merge an existing Data::Verifier::Results object into this one.
+
+=cut
+
 sub merge {
     my ($self, $other) = @_;
 

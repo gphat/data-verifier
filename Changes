@@ -1,6 +1,7 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Document merge method
 
 0.44 Feb 23 2011
   * Use Pod::Weaver
