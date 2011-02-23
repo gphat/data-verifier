@@ -4,11 +4,35 @@ use MooseX::Storage;
 
 with 'MooseX::Storage::Deferred';
 
+# ABSTRACT: Field from a Data::Verifier profile
+
+=attr original_value
+
+The string value of the field before any filters or coercion.  This will
+survive serialization whereas value will not.
+
+=method has_original_value
+
+Predicate that returns true if this field has an original value.
+
+=cut
+
 has original_value => (
     is => 'rw',
     isa => 'Maybe[Str|ArrayRef]',
     predicate => 'has_original_value'
 );
+
+=attr post_filter_value
+
+The string value of the field before after filters but before coercion. This
+will survive serialization whereas value will not.
+
+=method has_post_filter_value
+
+Predicate that returns true if this field has a post filter value.
+
+=cut
 
 has post_filter_value => (
     is => 'rw',
@@ -16,11 +40,28 @@ has post_filter_value => (
     predicate => 'has_post_filter_value'
 );
 
+=attr reason
+
+If this field is invalid then this attribute should contain a "reason".  Out
+of the box it will always contain a string.  One of:
+
+=method has_reason
+
+Predicate that returns true if this field has a reason.
+
+=cut
+
 has reason => (
     is => 'rw',
     isa => 'Str',
     predicate => 'has_reason'
 );
+
+=attr valid
+
+Boolean value representing this fields validity.
+
+=cut
 
 has valid => (
     is => 'rw',
@@ -28,71 +69,7 @@ has valid => (
     default => 1
 );
 
-has value => (
-    traits => [ 'DoNotSerialize' ],
-    is => 'rw',
-    isa => 'Any',
-    clearer => 'clear_value'
-);
-
-__PACKAGE__->meta->make_immutable;
-
-1;
-__END__
-
-=head1 NAME
-
-Data::Verifier::Field - Field from a Data::Verifier profile
-
-=head1 SYNOPSIS
-
-    use Data::Verifier;
-
-    my $dv = Data::Verifier->new(profile => {
-        name => {
-            required    => 1,
-            type        => 'Str',
-            filters     => [ qw(collapse trim) ]
-        },
-        age  => {
-            type        => 'Int'
-        },
-        sign => {
-            required    => 1,
-            type        => 'Str'
-        }
-    });
-
-    my $results = $dv->verify({
-        name => 'Cory', age => 'foobar'
-    });
-
-
-    my $field = $results->get_field('name');
-    say $field->value;
-
-=head1 ATTRIBUTES
-
-=head2 original_value
-
-The string value of the field before any filters or coercion.  This will
-survive serialization whereas value will not.
-
-=head2 post_filter_value
-
-The string value of the field before after filters but before coercion. This
-will survive serialization whereas value will not.
-
-=head2 reason
-
-If this field is invalid then this attribute should contain a "reason".  Out
-of the box it will always contain a string.  One of:
-
-=head2 valid
-
-Boolean value representing this fields validity.
-
-=head2 value
+=attr value
 
 The value of this field.  This will not be present if serialized, as it could
 be any value, some of which we may not know how to Serialize.  See
@@ -126,22 +103,49 @@ The value did not pass the type constraint.
 
 =back
 
-=head1 METHODS
-
-=head2 clear_value
+=method clear_value
 
 Clears the value attribute.
 
-=head1 AUTHOR
+=cut
 
-Cory G Watson, C<< <gphat at cpan.org> >>
+has value => (
+    traits => [ 'DoNotSerialize' ],
+    is => 'rw',
+    isa => 'Any',
+    clearer => 'clear_value'
+);
 
-=head1 COPYRIGHT & LICENSE
+__PACKAGE__->meta->make_immutable;
 
-Copyright 2009 Cold Hard Code, LLC
+1;
+__END__
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+=head1 SYNOPSIS
 
-See http://dev.perl.org/licenses/ for more information.
+    use Data::Verifier;
+
+    my $dv = Data::Verifier->new(profile => {
+        name => {
+            required    => 1,
+            type        => 'Str',
+            filters     => [ qw(collapse trim) ]
+        },
+        age  => {
+            type        => 'Int'
+        },
+        sign => {
+            required    => 1,
+            type        => 'Str'
+        }
+    });
+
+    my $results = $dv->verify({
+        name => 'Cory', age => 'foobar'
+    });
+
+
+    my $field = $results->get_field('name');
+    say $field->value;
+
+=cut

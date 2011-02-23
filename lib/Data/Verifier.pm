@@ -49,6 +49,13 @@ use Try::Tiny;
     $results->get_value('name'); # Filtered, valid value
     $results->get_value('age');  # undefined, as it's invalid
 
+=head1 DESCRIPTION
+
+Data::Verifier allows you verify data (such as web forms, which was the
+original idea) by leveraging the power of Moose's type constraint system.
+
+=begin :prelude
+
 =head1 MOTIVATION
 
 Data::Verifier firstly intends to leverage Moose's type constraint system,
@@ -88,6 +95,49 @@ the way that it does for hash references.  Each key in the profile is used as
 the name of a method to call on the object. In order to maintain consistency
 with the hash reference case, missing methods pass an 'undef' value into the
 verification process.
+
+=head2 Execution Order
+
+It may be important to understand the order in which the various steps of
+verification are performed:
+
+=over 4
+
+=item Global Filters
+
+Any global filters in the profile are executed.
+
+=item Per-Field Filters
+
+Any per-field filters are executed.
+
+=item Empty String Check
+
+If the value of the field is an empty string then it is changed to an undef.
+
+=item Required Check
+
+The parameter must now be defined if it is set as required.
+
+=item Length Check
+
+Minimum then maximum length is checked.
+
+=item Type Check (w/Coercion)
+
+At this point the type will be checked after an optional coercion.
+
+=item Depedency Checks
+
+If this field has dependents then those will not be processed.
+
+=item Post Check
+
+If the field has a post check it will now be executed.
+
+=back
+
+=end :prelude
 
 =cut
 
@@ -448,51 +498,8 @@ __PACKAGE__->meta->make_immutable;
 
 __END__
 
-=head1 DESCRIPTION
 
-Data::Verifier allows you verify data (such as web forms, which was the
-original idea) by leveraging the power of Moose's type constraint system.
-
-=head1 EXECUTION ORDER
-
-It may be important to understand the order in which the various steps of
-verification are performed:
-
-=over 4
-
-=item Global Filters
-
-Any global filters in the profile are executed.
-
-=item Per-Field Filters
-
-Any per-field filters are executed.
-
-=item Empty String Check
-
-If the value of the field is an empty string then it is changed to an undef.
-
-=item Required Check
-
-The parameter must now be defined if it is set as required.
-
-=item Length Check
-
-Minimum then maximum length is checked.
-
-=item Type Check (w/Coercion)
-
-At this point the type will be checked after an optional coercion.
-
-=item Depedency Checks
-
-If this field has dependents then those will not be processed.
-
-=item Post Check
-
-If the field has a post check it will now be executed.
-
-=back
+=begin :postlude
 
 =head1 CONTRIBUTORS
 
@@ -507,4 +514,6 @@ Jason May
 Dennis Schön
 
 J. Shirley
+
+=end :postlude
 

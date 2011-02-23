@@ -50,7 +50,84 @@ version 0.44
 Data::Verifier allows you verify data (such as web forms, which was the
 original idea) by leveraging the power of Moose's type constraint system.
 
-# Attributes
+# MOTIVATION
+
+Data::Verifier firstly intends to leverage Moose's type constraint system,
+which is significantly more powerful than anything I could create for the
+purposes of this module.  Secondly it aims to keep a fairly simple interface
+by leveraging the aforementioned type system to keep options to a minimum.
+
+# NOTES
+
+## Multiple Values
+
+It should be noted that if you choose to make a param a `Str` then validation
+will fail if multiple values are provided.  To allow multiple values you
+must use an `ArrayRef[Str]`.
+
+## Stops on First Failure
+
+Data::Verifier stops checking a field (not all, just the failed one) if it
+fails any of it's constraints. Consult the Execution Order below to ascertain
+the order.  For example, if a field exceeds it's max length then it will not
+be checked against it's type constraint.
+
+## Serialization
+
+Data::Verifier uses [MooseX::Storage](http://search.cpan.org/perldoc?MooseX::Storage) to allow serialization of
+[Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) objects.  You can use this to store results for
+validation across redirects.  Note, however, that the `value`
+attribute is __not__ serialized.  Since you can coerce a value into anything
+it is not reasonable to expect to be able to serialize it.  Have a look at
+the `original_value` or `post_filter_value` in [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results)
+if you want to know more.
+
+## Verifying Objects
+
+Data::Verifier can verify data encapsulated in objects too. Everything works
+the way that it does for hash references.  Each key in the profile is used as
+the name of a method to call on the object. In order to maintain consistency
+with the hash reference case, missing methods pass an 'undef' value into the
+verification process.
+
+## Execution Order
+
+It may be important to understand the order in which the various steps of
+verification are performed:
+
+- Global Filters
+
+Any global filters in the profile are executed.
+
+- Per-Field Filters
+
+Any per-field filters are executed.
+
+- Empty String Check
+
+If the value of the field is an empty string then it is changed to an undef.
+
+- Required Check
+
+The parameter must now be defined if it is set as required.
+
+- Length Check
+
+Minimum then maximum length is checked.
+
+- Type Check (w/Coercion)
+
+At this point the type will be checked after an optional coercion.
+
+- Depedency Checks
+
+If this field has dependents then those will not be processed.
+
+- Post Check
+
+If the field has a post check it will now be executed.
+
+# ATTRIBUTES
 
 ## filters
 
@@ -183,83 +260,6 @@ specific entity.
             },
         }
     );
-
-# MOTIVATION
-
-Data::Verifier firstly intends to leverage Moose's type constraint system,
-which is significantly more powerful than anything I could create for the
-purposes of this module.  Secondly it aims to keep a fairly simple interface
-by leveraging the aforementioned type system to keep options to a minimum.
-
-# NOTES
-
-## Multiple Values
-
-It should be noted that if you choose to make a param a `Str` then validation
-will fail if multiple values are provided.  To allow multiple values you
-must use an `ArrayRef[Str]`.
-
-## Stops on First Failure
-
-Data::Verifier stops checking a field (not all, just the failed one) if it
-fails any of it's constraints. Consult the Execution Order below to ascertain
-the order.  For example, if a field exceeds it's max length then it will not
-be checked against it's type constraint.
-
-## Serialization
-
-Data::Verifier uses [MooseX::Storage](http://search.cpan.org/perldoc?MooseX::Storage) to allow serialization of
-[Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) objects.  You can use this to store results for
-validation across redirects.  Note, however, that the `value`
-attribute is __not__ serialized.  Since you can coerce a value into anything
-it is not reasonable to expect to be able to serialize it.  Have a look at
-the `original_value` or `post_filter_value` in [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results)
-if you want to know more.
-
-## Verifying Objects
-
-Data::Verifier can verify data encapsulated in objects too. Everything works
-the way that it does for hash references.  Each key in the profile is used as
-the name of a method to call on the object. In order to maintain consistency
-with the hash reference case, missing methods pass an 'undef' value into the
-verification process.
-
-# EXECUTION ORDER
-
-It may be important to understand the order in which the various steps of
-verification are performed:
-
-- Global Filters
-
-Any global filters in the profile are executed.
-
-- Per-Field Filters
-
-Any per-field filters are executed.
-
-- Empty String Check
-
-If the value of the field is an empty string then it is changed to an undef.
-
-- Required Check
-
-The parameter must now be defined if it is set as required.
-
-- Length Check
-
-Minimum then maximum length is checked.
-
-- Type Check (w/Coercion)
-
-At this point the type will be checked after an optional coercion.
-
-- Depedency Checks
-
-If this field has dependents then those will not be processed.
-
-- Post Check
-
-If the field has a post check it will now be executed.
 
 # CONTRIBUTORS
 

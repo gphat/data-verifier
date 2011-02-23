@@ -1,5 +1,14 @@
 package Data::Verifier::Filters;
 use strict;
+use warnings;
+
+# ABSTRACT: Filters for values
+
+=method collapse
+
+Collapses all consecutive whitespace into a single space
+
+=cut
 
 sub collapse {
     my ($self, $val) = @_;
@@ -8,6 +17,12 @@ sub collapse {
     return $val;
 }
 
+=method flatten
+
+Removes B<all whitespace>.
+
+=cut
+
 sub flatten {
     my ($self, $val) = @_;
 
@@ -15,11 +30,23 @@ sub flatten {
     return $val;
 }
 
+=method lower
+
+Converts the value to lowercase.
+
+=cut
+
 sub lower {
     my ($self, $val) = @_;
 
     return lc($val);
 }
+
+=method trim
+
+Removes leading and trailing whitespace
+
+=cut
 
 sub trim {
     my ($self, $val) = @_;
@@ -29,6 +56,12 @@ sub trim {
     return $val;
 }
 
+=method upper
+
+Converts the value to uppercase.
+
+=cut
+
 sub upper {
     my ($self, $val) = @_;
 
@@ -37,9 +70,7 @@ sub upper {
 
 1;
 
-=head1 NAME
-
-Data::Verifier::Filters - Filters for values
+__END__
 
 =head1 SYNOPSIS
 
@@ -70,43 +101,3 @@ filters:
       }
   });
   $dv->get_value('name'); # No whitespace!
-
-=head1 FILTERS
-
-These filters are supplied free of charge.  Since they are common, it made
-sense to include them.  Patches are welcome for other filters that might be
-used commonly.
-
-=head2 collapse
-
-Collapses all consecutive whitespace into a single space
-
-=head2 flatten
-
-Removes B<all whitespace>.
-
-=head2 lower
-
-Converts the value to lowercase.
-
-=head2 trim
-
-Removes leading and trailing whitespace
-
-=head2 upper
-
-Converts the value to uppercase.
-
-=head1 AUTHOR
-
-Cory G Watson, C<< <gphat at cpan.org> >>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Cold Hard Code, LLC
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
