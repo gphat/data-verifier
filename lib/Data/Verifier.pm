@@ -1,6 +1,8 @@
 package Data::Verifier;
 use Moose;
 
+# ABSTRACT: Profile based data verification with Moose type constraints.
+
 use Data::Verifier::Field;
 use Data::Verifier::Filters;
 use Data::Verifier::Results;
@@ -8,17 +10,239 @@ use Moose::Util::TypeConstraints;
 use Scalar::Util qw(blessed);
 use Try::Tiny;
 
+=head1 SYNOPSIS
+
+    use Data::Verifier;
+
+    my $dv = Data::Verifier->new(
+        filters => [ qw(trim) ],
+        profile => {
+            name => {
+                required    => 1,
+                type        => 'Str',
+               filters     => [ qw(collapse) ]
+            },
+            age  => {
+                type        => 'Int'
+            },
+            sign => {
+                required    => 1,
+                type        => 'Str'
+            }
+        }
+    );
+
+    # Pass in a hash of data
+    my $results = $dv->verify({
+        name => 'Cory', age => 'foobar'
+    });
+
+    $results->success; # no
+
+    $results->is_invalid('name'); # no
+    $results->is_invalid('age');  # yes
+
+    $results->is_missing('name'); # no
+    $results->is_missing('sign'); # yes
+
+    $results->get_original_value('name'); # Unchanged, original value
+    $results->get_value('name'); # Filtered, valid value
+    $results->get_value('age');  # undefined, as it's invalid
+
+=head1 MOTIVATION
+
+Data::Verifier firstly intends to leverage Moose's type constraint system,
+which is significantly more powerful than anything I could create for the
+purposes of this module.  Secondly it aims to keep a fairly simple interface
+by leveraging the aforementioned type system to keep options to a minimum.
+
+=head1 NOTES
+
+=head2 Multiple Values
+
+It should be noted that if you choose to make a param a C<Str> then validation
+will fail if multiple values are provided.  To allow multiple values you
+must use an C<ArrayRef[Str]>.
+
+=head2 Stops on First Failure
+
+Data::Verifier stops checking a field (not all, just the failed one) if it
+fails any of it's constraints. Consult the Execution Order below to ascertain
+the order.  For example, if a field exceeds it's max length then it will not
+be checked against it's type constraint.
+
+=head2 Serialization
+
+Data::Verifier uses L<MooseX::Storage> to allow serialization of
+L<Data::Verifier::Results> objects.  You can use this to store results for
+validation across redirects.  Note, however, that the C<value>
+attribute is B<not> serialized.  Since you can coerce a value into anything
+it is not reasonable to expect to be able to serialize it.  Have a look at
+the C<original_value> or C<post_filter_value> in L<Data::Verifier::Results>
+if you want to know more.
+
+=head2 Verifying Objects
+
+Data::Verifier can verify data encapsulated in objects too. Everything works
+the way that it does for hash references.  Each key in the profile is used as
+the name of a method to call on the object. In order to maintain consistency
+with the hash reference case, missing methods pass an 'undef' value into the
+verification process.
+
+=cut
+
+=attr filters
+
+An optional arrayref of filter names through which B<all> values will be
+passed.
+
+=cut
+
 has 'filters' => (
     is => 'ro',
     isa => 'ArrayRef[Str|CodeRef]',
     default => sub { [] }
 );
 
+
+=attr profile
+
+The profile is a hashref.  Each value you'd like to verify is a key.  The
+values specify all the options to use with the field.  The available options
+are:
+
+=over 4
+
+=item B<coerce>
+
+If true then the value will be given an opportunity to coerce via Moose's
+type system.  If this is set, coercion will be ignored.
+
+=item B<coercion>
+
+Set this attribute to the coercion defined for this type.  If B<coerce> is 
+set this attribute will be ignored.  See the C<coercion> method above.
+
+=item B<dependent>
+
+Allows a set of fields to be specifid as dependents of this one.  The argument
+for this key is a full-fledged profile as you would give to the profile key:
+
+  my $verifier = Data::Verifier->new(
+      profile => {
+          password    => {
+              dependent => {
+                  password2 => {
+                      required => 1,
+                  }
+              }
+          }
+      }
+  );
+
+In the above example C<password> is not required.  If it is provided then
+password2 must also be provided.  If any depedents of a field are missing or
+invalid then that field is B<invalid>.  In our example if password is provided
+and password2 is missing then password will be invalid.
+
+=item B<filters>
+
+An optional list of filters through which this specific value will be run. 
+See the documentation for L<Data::Verifier::Filters> to learn more.  This
+value my be either a scalar (string or coderef) or an arrayref of strings or
+coderefs.
+
+=item B<max_length>
+
+An optional length which the value may not exceed.
+
+=item B<min_length>
+
+An optional length which the value may not be less.
+
+=item B<post_check>
+
+The C<post_check> key takes a subref and, after all verification has finished,
+executes the subref with the results of the verification as it's only argument.
+The subref's return value determines if the field to which the post_check
+belongs is invalid.  A typical example would be when the value of one field
+must be equal to the other, like an email confirmation:
+
+  my $verifier = Data::Verifier->new(
+      profile => {
+          email    => {
+              required => 1,
+              dependent => {
+                  email2 => {
+                      required => 1,
+                  }
+              },
+              post_check => sub {
+                  my $r = shift;
+                  return $r->get_value('email') eq $r->get_value('email2');
+              }
+          },
+      }
+  );
+
+  my $results = $verifier->verify({
+      email => 'foo@example.com', email2 => 'foo2@example.com'
+  });
+
+  $results->success; # false
+  $results->is_valid('email'); # false
+  $results->is_valid('email2'); # true, as it has no post_check
+
+In the above example, C<success> will return false, because the value of
+C<email> does not match the value of C<email2>.  C<is_valid> will return false
+for C<email> but true for C<email2>, since nothing specifically invalidated it.
+In this example you should rely on the C<email> field, as C<email2> carries no
+significance but to confirm C<email>.
+
+B<Note about post_check and exceptions>: If have a more complex post_check
+that could fail in multiple ways, you can C<die> in your post_check coderef
+and the exception will be stored in the fields C<reason> attribute.
+
+=item B<required>
+
+Determines if this field is required for verification.
+
+=item B<type>
+
+The name of the Moose type constraint to use with verifying this field's
+value. Note, this will also accept an instance of
+L<Moose::Meta::TypeConstraint>, although it may not serialize properly as a
+result.
+
+=back
+
+=cut
+
 has 'profile' => (
     is => 'ro',
     isa => 'HashRef[HashRef]',
     required => 1
 );
+
+=method coercion
+
+Define a coercion to use for verification.  This will not define a global
+Moose type coercion, but is instead just a single coercion to apply to a 
+specific entity.
+
+    my $verifier = Data::Verifier->new(
+        profile => {
+            a_string => {
+                type     => 'Str',
+                coercion => Data::Verifier::coercion(
+                    from => 'Int', 
+                        via => sub { (qw[ one two three ])[ ($_ - 1) ] }
+                ),
+            },
+        }
+    );
+
+=cut
 
 sub coercion {
     my %params = @_;
@@ -224,234 +448,10 @@ __PACKAGE__->meta->make_immutable;
 
 __END__
 
-=head1 NAME
-
-Data::Verifier - Profile based data verification with Moose type constraints.
-
 =head1 DESCRIPTION
 
 Data::Verifier allows you verify data (such as web forms, which was the
 original idea) by leveraging the power of Moose's type constraint system.
-
-=head1 SYNOPSIS
-
-    use Data::Verifier;
-
-    my $dv = Data::Verifier->new(
-        filters => [ qw(trim) ],
-        profile => {
-            name => {
-                required    => 1,
-                type        => 'Str',
-               filters     => [ qw(collapse) ]
-            },
-            age  => {
-                type        => 'Int'
-            },
-            sign => {
-                required    => 1,
-                type        => 'Str'
-            }
-        }
-    );
-
-    # Pass in a hash of data
-    my $results = $dv->verify({
-        name => 'Cory', age => 'foobar'
-    });
-
-    $results->success; # no
-
-    $results->is_invalid('name'); # no
-    $results->is_invalid('age');  # yes
-
-    $results->is_missing('name'); # no
-    $results->is_missing('sign'); # yes
-
-    $results->get_original_value('name'); # Unchanged, original value
-    $results->get_value('name'); # Filtered, valid value
-    $results->get_value('age');  # undefined, as it's invalid
-
-=head1 MOTIVATION
-
-Data::Verifier firstly intends to leverage Moose's type constraint system,
-which is significantly more powerful than anything I could create for the
-purposes of this module.  Secondly it aims to keep a fairly simple interface
-by leveraging the aforementioned type system to keep options to a minimum.
-
-=head1 NOTES
-
-=head2 Multiple Values
-
-It should be noted that if you choose to make a param a C<Str> then validation
-will fail if multiple values are provided.  To allow multiple values you
-must use an C<ArrayRef[Str]>.
-
-=head2 Stops on First Failure
-
-Data::Verifier stops checking a field (not all, just the failed one) if it
-fails any of it's constraints. Consult the Execution Order below to ascertain
-the order.  For example, if a field exceeds it's max length then it will not
-be checked against it's type constraint.
-
-=head2 Serialization
-
-Data::Verifier uses L<MooseX::Storage> to allow serialization of
-L<Data::Verifier::Results> objects.  You can use this to store results for
-validation across redirects.  Note, however, that the C<value>
-attribute is B<not> serialized.  Since you can coerce a value into anything
-it is not reasonable to expect to be able to serialize it.  Have a look at
-the C<original_value> or C<post_filter_value> in L<Data::Verifier::Results>
-if you want to know more.
-
-=head2 Verifying Objects
-
-Data::Verifier can verify data encapsulated in objects too. Everything works
-the way that it does for hash references.  Each key in the profile is used as
-the name of a method to call on the object. In order to maintain consistency
-with the hash reference case, missing methods pass an 'undef' value into the
-verification process.
-
-=head1 METHODS
-
-=head2 coercion
-
-Define a coercion to use for verification.  This will not define a global
-Moose type coercion, but is instead just a single coercion to apply to a 
-specific entity.
-
-    my $verifier = Data::Verifier->new(
-        profile => {
-            a_string => {
-                type     => 'Str',
-                coercion => Data::Verifier::coercion(
-                    from => 'Int', 
-                        via => sub { (qw[ one two three ])[ ($_ - 1) ] }
-                ),
-            },
-        }
-    );
-
-Now, after C<a_string> is processed by Data::Verifier, the results will 
-return the coerced and validated value.
-
-=head1 ATTRIBUTES
-
-=head2 filters
-
-An optional arrayref of filter names through which B<all> values will be
-passed.
-
-=head2 profile
-
-The profile is a hashref.  Each value you'd like to verify is a key.  The
-values specify all the options to use with the field.  The available options
-are:
-
-=over 4
-
-=item B<coerce>
-
-If true then the value will be given an opportunity to coerce via Moose's
-type system.  If this is set, coercion will be ignored.
-
-=item B<coercion>
-
-Set this attribute to the coercion defined for this type.  If B<coerce> is 
-set this attribute will be ignored.  See the C<coercion> method above.
-
-=item B<dependent>
-
-Allows a set of fields to be specifid as dependents of this one.  The argument
-for this key is a full-fledged profile as you would give to the profile key:
-
-  my $verifier = Data::Verifier->new(
-      profile => {
-          password    => {
-              dependent => {
-                  password2 => {
-                      required => 1,
-                  }
-              }
-          }
-      }
-  );
-
-In the above example C<password> is not required.  If it is provided then
-password2 must also be provided.  If any depedents of a field are missing or
-invalid then that field is B<invalid>.  In our example if password is provided
-and password2 is missing then password will be invalid.
-
-=item B<filters>
-
-An optional list of filters through which this specific value will be run. 
-See the documentation for L<Data::Verifier::Filters> to learn more.  This
-value my be either a scalar (string or coderef) or an arrayref of strings or
-coderefs.
-
-=item B<max_length>
-
-An optional length which the value may not exceed.
-
-=item B<min_length>
-
-An optional length which the value may not be less.
-
-=item B<post_check>
-
-The C<post_check> key takes a subref and, after all verification has finished,
-executes the subref with the results of the verification as it's only argument.
-The subref's return value determines if the field to which the post_check
-belongs is invalid.  A typical example would be when the value of one field
-must be equal to the other, like an email confirmation:
-
-  my $verifier = Data::Verifier->new(
-      profile => {
-          email    => {
-              required => 1,
-              dependent => {
-                  email2 => {
-                      required => 1,
-                  }
-              },
-              post_check => sub {
-                  my $r = shift;
-                  return $r->get_value('email') eq $r->get_value('email2');
-              }
-          },
-      }
-  );
-
-  my $results = $verifier->verify({
-      email => 'foo@example.com', email2 => 'foo2@example.com'
-  });
-
-  $results->success; # false
-  $results->is_valid('email'); # false
-  $results->is_valid('email2'); # true, as it has no post_check
-
-In the above example, C<success> will return false, because the value of
-C<email> does not match the value of C<email2>.  C<is_valid> will return false
-for C<email> but true for C<email2>, since nothing specifically invalidated it.
-In this example you should rely on the C<email> field, as C<email2> carries no
-significance but to confirm C<email>.
-
-B<Note about post_check and exceptions>: If have a more complex post_check
-that could fail in multiple ways, you can C<die> in your post_check coderef
-and the exception will be stored in the fields C<reason> attribute.
-
-=item B<required>
-
-Determines if this field is required for verification.
-
-=item B<type>
-
-The name of the Moose type constraint to use with verifying this field's
-value. Note, this will also accept an instance of
-L<Moose::Meta::TypeConstraint>, although it may not serialize properly as a
-result.
-
-=back
 
 =head1 EXECUTION ORDER
 
@@ -494,10 +494,6 @@ If the field has a post check it will now be executed.
 
 =back
 
-=head1 AUTHOR
-
-Cory G Watson, C<< <gphat at cpan.org> >>
-
 =head1 CONTRIBUTORS
 
 Mike Eldridge
@@ -511,14 +507,4 @@ Jason May
 Dennis Schön
 
 J. Shirley
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Cold Hard Code, LLC
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
 
