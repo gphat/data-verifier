@@ -71,6 +71,56 @@ It should be noted that if you choose to make a param a C<Str> then validation
 will fail if multiple values are provided.  To allow multiple values you
 must use an C<ArrayRef[Str]>.
 
+=head2 ArrayRef based types (more on Multiple Values)
+
+If you use an ArrayRef-based parameterized type (e.g. ArrayRef[Str]) then
+Data::Verifier has the following behavior:
+
+Each parameter supplied for the field is checked.  If all the members pass
+then the field is considered valid.  If any of the members fail, then the
+entire field is invalid.  If any of the members pass then those members will
+be included in the C<values> attribute.  An example:
+
+    use Moose::Util::TypeConstraints;
+    use Data::Verifier;
+
+    subtype 'Over10'
+    => as 'Num'
+    => where { $_ > 10 };
+
+    my $verifier = Data::Verifier->new(
+    profile => {
+        foos => {
+            type => 'ArrayRef[NumberOver10]',
+        }
+    }
+    );
+
+    my $res = $verifier->verify(foos => [ 1, 2, 30, 40 ]);
+    $res->success; # This is false, as 1 and 2 did not pass
+    $res->get_value('foos'); # [ 30, 40 ] because 30 and 40 passed!
+    $res->original_value('foos); # [ 1, 2, 30, 40 ] because it's all of them!
+  
+It should also be noted that C<post_check>s that are specified in the profile
+do B<not> get applied to the individual members, only to the entire, completed
+field that they are constituents of.
+
+B<Note>: Filters and such DO get applied to individual fields, so something
+like:
+
+    my $verifier = Data::Verifier->new(
+      filters => qw(trim),
+      profile => {
+          foos => {
+              type => 'ArrayRef[Str]',
+              filters => 'collapse'
+          }
+      }
+    );
+    
+In the above example, both C<trim> and C<collapse> B<bill> be applied to each
+member of foos.
+
 =head2 Stops on First Failure
 
 Data::Verifier stops checking a field (not all, just the failed one) if it
@@ -210,6 +260,14 @@ An optional length which the value may not exceed.
 
 An optional length which the value may not be less.
 
+=item B<member_post_check>
+
+A post check that is only to be applied to the members of an ArrayRef based
+type.  Because it is verified in something of a vacuum, the results object it
+receives will have no other values to look at.  Therefore member_post_check
+is only useful if you want to do some sort of weird post-check thing that I
+can't imagine would be a good idea.
+
 =item B<post_check>
 
 The C<post_check> key takes a subref and, after all verification has finished,
@@ -252,6 +310,10 @@ significance but to confirm C<email>.
 B<Note about post_check and exceptions>: If have a more complex post_check
 that could fail in multiple ways, you can C<die> in your post_check coderef
 and the exception will be stored in the fields C<reason> attribute.
+
+B<Note about post_check and ArrayRef based types>: The post check is B<not>
+executed for ArrayRef based types.  See the note earlier in this documentation
+about ArrayRefs.
 
 =item B<required>
 
