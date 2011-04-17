@@ -354,7 +354,6 @@ sub verify {
                 # Copy the profile.
                 my %prof_copy = %{ $fprof };
                 $prof_copy{type} = $tc->name;
-                delete($prof_copy{post_check});
                 my $dv = Data::Verifier->new(
                     # Use the global filters
                     filters => $self->filters,
@@ -499,7 +498,7 @@ sub verify {
         }
 
         # Add this key the post check so we know to run through them
-        if(defined($fprof->{post_check}) && $fprof->{post_check}) {
+        if(!$members && defined($fprof->{post_check}) && $fprof->{post_check}) {
             push(@post_checks, $key);
         }
         # Add this key to the post check if we're on "member" mode and there
@@ -520,7 +519,10 @@ sub verify {
             my $field = $results->get_field($key);
 
             # Execute the post_check...
-            my $pc = $fprof->{post_check} || $fprof->{member_post_check};
+            
+            # If we are in member mode, use the member post check, else use
+            # plain ol' post check.
+            my $pc = $members ? $fprof->{member_post_check} : $fprof->{post_check};
             if(defined($pc) && $pc) {
                 try {
                     unless($results->$pc()) {
