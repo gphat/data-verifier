@@ -304,20 +304,21 @@ sub coercion {
 }
 
 sub verify {
-    my ($self, $params) = @_;
+    my ($self, $params, $members) = @_;
 
     my $results = Data::Verifier::Results->new;
     my $profile = $self->profile;
 
     my $blessed_params = blessed($params);
 
+    my $skip_string_checks = 0;
     my @post_checks = ();
     foreach my $key (keys(%{ $profile })) {
 
         # Get the profile part that is pertinent to this field
         my $fprof = $profile->{$key};
 
-
+        # Deal with the fact that what we're given may be an object.
         my $val = do {
             if($blessed_params) {
                 $params->can($key) ? $params->$key() : undef;
@@ -326,75 +327,146 @@ sub verify {
             }
         };
 
-        my $oval = $val;
-
+        # Creat the "field" that we'll put into the result.
         my $field = Data::Verifier::Field->new;
+
+        # Save the original value.
         if(ref($val) eq 'ARRAY') {
-            my @values = @{ $val };
+            my @values = @{ $val }; # Make a copy of the array
             $field->original_value(\@values);
         } else {
             $field->original_value($val);
         }
 
-        # Pass through global filters
-        if($self->filters && defined $val) {
-            $val = $self->_filter_value($self->filters, $val);
-        }
-
-        # And now per-field ones
-        if($fprof->{filters} && defined $val) {
-            $val = $self->_filter_value($fprof->{filters}, $val);
-        }
-
-        # Empty strings are undefined
-        if(defined($val) && $val eq '') {
-            $val = undef;
-        }
-
-        if(ref($val)) {
-            my @values = @{ $val };
-            $field->post_filter_value(\@values);
-        } else {
-            $field->post_filter_value($val);
-        }
-
-        if($fprof->{required} && !defined($val)) {
-            # Set required fields to undef, as they are missing
-            $results->set_field($key, undef);
-        } else {
-            $results->set_field($key, $field);
-        }
-
-        # No sense in continuing if the value isn't defined.
-        next unless defined($val);
-
-        # Check min length
-        if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
-            $field->reason('min_length');
-            $field->valid(0);
-            next; # stop processing!
-        }
-
-        # Check max length
-        if($fprof->{max_length} && length($val) > $fprof->{max_length}) {
-            $field->reason('max_length');
-            $field->valid(0);
-            next; # stop processing!
-        }
-
-        # Validate it
-        if(defined($val) && $fprof->{type}) {
+        # Early type check to catch parameterized ArrayRefs.
+        if($fprof->{type}) {
             my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint($fprof->{type});
 
             die "Unknown type constraint '$fprof->{type}'" unless defined($cons);
 
+            # If this type is a paramterized arrayref, then we'll handle each
+            # param as if it was an independet value and run it through the
+            # whole profile.
+            if($cons->is_a_type_of('ArrayRef') && $cons->can('type_parameter')) {
+
+                # Get the type parameter for this arrayref
+                my $tc = $cons->type_parameter;
+                # Copy the profile.
+                my %prof_copy = %{ $fprof };
+                $prof_copy{type} = $tc->name;
+                delete($prof_copy{post_check});
+                my $dv = Data::Verifier->new(
+                    # Use the global filters
+                    filters => $self->filters,
+                    # And JUST this field
+                    profile => { $key => \%prof_copy }
+                );
+
+                # Make sure we are dealing with an array
+                my @possibles;
+                if(ref($val) eq 'ARRAY') {
+                    @possibles = @{ $val };
+                } else {
+                    @possibles = ( $val );
+                }
+
+                # So we can keep up with passed values.
+                my @passed;
+                my @pass_post_filter;
+                # Verify each one
+                foreach my $poss (@possibles) {
+                    my $res = $dv->verify({ $key => $poss }, 1);
+                    if($res->success) {
+                        # We need to keep up with passed values as well as
+                        # post filter values, copying them out of the result
+                        # for use in our field.
+                        push(@passed, $res->get_value($key));
+                        push(@pass_post_filter, $res->get_post_filter_value($key));
+                    } else {
+                        # Mark the whole field as failed.  We'll use this
+                        # later.
+                        $field->valid(0);
+                    }
+                }
+
+                # Set the value and post_filter_value for the field, then
+                # set the field in the result.  We're done, since we sorta
+                # recursed to check all the params for this field.
+                $val = \@passed;
+                $field->value(\@passed);
+                $field->post_filter_value(\@pass_post_filter);
+                $results->set_field($key, $field);
+
+                # Skip all the "string" checks, since we've already done all the
+                # real work.
+                $skip_string_checks = 1;
+            }
+            next unless $field->valid; # stop processing if invalid
+        }
+
+        unless($skip_string_checks) {
+            # Pass through global filters
+            if($self->filters && defined $val) {
+                $val = $self->_filter_value($self->filters, $val);
+            }
+
+            # And now per-field ones
+            if($fprof->{filters} && defined $val) {
+                $val = $self->_filter_value($fprof->{filters}, $val);
+            }
+
+            # Empty strings are undefined
+            if(defined($val) && $val eq '') {
+                $val = undef;
+            }
+
+            if(ref($val)) {
+                my @values = @{ $val };
+                $field->post_filter_value(\@values);
+            } else {
+                $field->post_filter_value($val);
+            }
+
+            if($fprof->{required} && !defined($val)) {
+                # Set required fields to undef, as they are missing
+                $results->set_field($key, undef);
+            } else {
+                $results->set_field($key, $field);
+            }
+
+            # No sense in continuing if the value isn't defined.
+            next unless defined($val);
+
+            # Check min length
+            if($fprof->{min_length} && length($val) < $fprof->{min_length}) {
+                $field->reason('min_length');
+                $field->valid(0);
+                next; # stop processing!
+            }
+
+            # Check max length
+            if($fprof->{max_length} && length($val) > $fprof->{max_length}) {
+                $field->reason('max_length');
+                $field->valid(0);
+                next; # stop processing!
+            }
+        }
+
+        # Validate it
+        if($fprof->{type}) {
+            my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint($fprof->{type});
+
+            die "Unknown type constraint '$fprof->{type}'" unless defined($cons);
+
+            # Look for a global coercion
             if($fprof->{coerce}) {
                 $val = $cons->coerce($val);
             }
+            # Try a one-off coercion.
             elsif(my $coercion = $fprof->{coercion}) {
                 $val = $coercion->coerce($val);
             }
-
+    
             unless($cons->check($val)) {
                 $field->reason('type_constraint');
                 $field->valid(0);
@@ -430,6 +502,11 @@ sub verify {
         if(defined($fprof->{post_check}) && $fprof->{post_check}) {
             push(@post_checks, $key);
         }
+        # Add this key to the post check if we're on "member" mode and there
+        # is a member_post_check specified
+        if($members && defined($fprof->{member_post_check}) && $fprof->{member_post_check}) {
+            push(@post_checks, $key);
+        }
 
         # Set the value
         $field->value($val);
@@ -443,7 +520,7 @@ sub verify {
             my $field = $results->get_field($key);
 
             # Execute the post_check...
-            my $pc = $fprof->{post_check};
+            my $pc = $fprof->{post_check} || $fprof->{member_post_check};
             if(defined($pc) && $pc) {
                 try {
                     unless($results->$pc()) {

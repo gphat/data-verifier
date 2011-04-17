@@ -1,17 +1,17 @@
-package main;
-
 use warnings;
 use strict;
 
 use Test::More;
 
+use Data::Verifier;
+
 my $verifier = Data::Verifier->new(
     profile => {
-        'foos[]' => {
-            type => 'Str',
-            post_check => sub {
-                # $_->get_value('...') wont work here, maybe $_?
-                return $_ =~ /^Foo/;
+        foos => {
+            type => 'ArrayRef[Str]',
+            member_post_check => sub {
+                my $r = shift;
+                return $r->get_value('foos') =~ /^Foo/;
             }
         }
     }
