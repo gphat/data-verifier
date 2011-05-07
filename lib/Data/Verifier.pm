@@ -481,7 +481,7 @@ sub verify {
                 $val = undef;
             }
 
-            if(ref($val)) {
+            if(ref($val) eq 'ARRAY' ) {
                 my @values = @{ $val };
                 $field->post_filter_value(\@values);
             } else {
@@ -612,7 +612,9 @@ sub _filter_value {
     if(ref($filters) ne 'ARRAY') {
         $filters = [ $filters ];
     }
-    if(!ref($values)) {
+    # If we already have an array, just let it be. Otherwise transform the
+    # value into an array. ($values may also be a HashRef[Str] here)
+    unless ( ref $values eq 'ARRAY' ) {
         $created_ref = 1;
         $values = [ $values ];
     }
