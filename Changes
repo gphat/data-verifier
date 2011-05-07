@@ -1,6 +1,11 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Allow parameters to be HashRef[Str].  This lets you use nested parameters
+    (foo.bar.baz) without.  Filters have also been modified to not assume all
+    references are arrays.
+  * Add support for parameterized arrays, where each value of an array with
+    a type is checked.  See Data::Verifier's POD.
 
 0.45 Feb 23 2011
   * Document merge method
