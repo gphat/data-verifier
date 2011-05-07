@@ -19,7 +19,7 @@ Predicate that returns true if this field has an original value.
 
 has original_value => (
     is => 'rw',
-    isa => 'Maybe[Str|ArrayRef]',
+    isa => 'Maybe[Str|ArrayRef|HashRef[Str]]',
     predicate => 'has_original_value'
 );
 
