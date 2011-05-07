@@ -65,6 +65,56 @@ It should be noted that if you choose to make a param a `Str` then validation
 will fail if multiple values are provided.  To allow multiple values you
 must use an `ArrayRef[Str]`.
 
+## ArrayRef based types (more on Multiple Values)
+
+If you use an ArrayRef-based parameterized type (e.g. ArrayRef[Str]) then
+Data::Verifier has the following behavior:
+
+Each parameter supplied for the field is checked.  If all the members pass
+then the field is considered valid.  If any of the members fail, then the
+entire field is invalid.  If any of the members pass then those members will
+be included in the `values` attribute.  An example:
+
+    use Moose::Util::TypeConstraints;
+    use Data::Verifier;
+
+    subtype 'Over10'
+    => as 'Num'
+    => where { $_ > 10 };
+
+    my $verifier = Data::Verifier->new(
+    profile => {
+        foos => {
+            type => 'ArrayRef[NumberOver10]',
+        }
+    }
+    );
+
+    my $res = $verifier->verify(foos => [ 1, 2, 30, 40 ]);
+    $res->success; # This is false, as 1 and 2 did not pass
+    $res->get_value('foos'); # [ 30, 40 ] because 30 and 40 passed!
+    $res->original_value('foos); # [ 1, 2, 30, 40 ] because it's all of them!
+
+It should also be noted that `post_check`s that are specified in the profile
+do __not__ get applied to the individual members, only to the entire, completed
+field that they are constituents of.
+
+__Note__: Filters and such DO get applied to individual fields, so something
+like:
+
+    my $verifier = Data::Verifier->new(
+      filters => qw(trim),
+      profile => {
+          foos => {
+              type => 'ArrayRef[Str]',
+              filters => 'collapse'
+          }
+      }
+    );
+
+In the above example, both `trim` and `collapse` __bill__ be applied to each
+member of foos.
+
 ## Stops on First Failure
 
 Data::Verifier stops checking a field (not all, just the failed one) if it
@@ -187,6 +237,14 @@ An optional length which the value may not exceed.
 
 An optional length which the value may not be less.
 
+- __member_post_check__
+
+A post check that is only to be applied to the members of an ArrayRef based
+type.  Because it is verified in something of a vacuum, the results object it
+receives will have no other values to look at.  Therefore member_post_check
+is only useful if you want to do some sort of weird post-check thing that I
+can't imagine would be a good idea.
+
 - __post_check__
 
 The `post_check` key takes a subref and, after all verification has finished,
@@ -229,6 +287,10 @@ significance but to confirm `email`.
 __Note about post_check and exceptions__: If have a more complex post_check
 that could fail in multiple ways, you can `die` in your post_check coderef
 and the exception will be stored in the fields `reason` attribute.
+
+__Note about post_check and ArrayRef based types__: The post check is __not__
+executed for ArrayRef based types.  See the note earlier in this documentation
+about ArrayRefs.
 
 - __required__
 
