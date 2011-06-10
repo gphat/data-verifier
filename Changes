@@ -1,6 +1,10 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Moving skip_string_checks down to where it should be, fixing weird bugs
+    in repeated use of a verifier profile. (jshirley)
+
+0.46 May 7 2011
   * Allow parameters to be HashRef[Str].  This lets you use nested parameters
     (foo.bar.baz) without.  Filters have also been modified to not assume all
     references are arrays.
