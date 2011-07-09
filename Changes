@@ -1,6 +1,9 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Use GPHAT dzil bundle
+
+0.47 Jun 10 2011
   * Moving skip_string_checks down to where it should be, fixing weird bugs
     in repeated use of a verifier profile. (jshirley)
 
