@@ -1,6 +1,9 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Fix missing Prereqs
+
+0.48 Jul 9 2011
   * Use GPHAT dzil bundle
 
 0.47 Jun 10 2011
