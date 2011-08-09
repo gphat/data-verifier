@@ -648,7 +648,6 @@ __PACKAGE__->meta->make_immutable;
 
 __END__
 
-
 =begin :postlude
 
 =head1 CONTRIBUTORS
@@ -656,6 +655,8 @@ __END__
 Mike Eldridge
 
 George Hartzell
+
+Tomohiro Hosaka
 
 Stevan Little
 
