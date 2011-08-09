@@ -57,4 +57,32 @@ my $verifier = Data::Verifier->new(
     ok(!defined($results->get_value('password')), 'get_value password');
 }
 
+{
+    my $dv = Data::Verifier->new(
+        profile => {
+            id => {
+                required => 1,
+                type => "ArrayRef[Int]",
+                dependent => {
+                    comment => {
+                        required => 1,
+                        type => "ArrayRef[Str]",
+                    },
+                },
+                post_check => sub {
+                    my $r = shift;
+                    @{ $r->get_value('id') } == @{ $r->get_value('comment') };
+                },
+            },
+        }
+    );
+
+    ok( !$dv->verify( {} )->success, 'missing' );
+    ok( $dv->verify( { id => [], comment => [] } )->success, 'success (even if [])' );
+    ok( $dv->verify( { id => [qw(1 2 3)], comment => [qw(one two three)] } )->success, 'success (pairs id&comment)');
+    ok( !$dv->verify( { id => [qw(1 2 3 4)], comment => [qw(one two three)] } )->success, 'invalid' );
+    ok( !$dv->verify( { id => [qw(1 2 3)], comment => [qw(one two three four)] } )->success, 'invalid'  );
+    ok( !$dv->verify( { id => [qw(1 2 3 four)], comment => [qw(one two three four)] } )->success, 'invalid'  );
+}
+
 done_testing;
