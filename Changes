@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+
+0.50 Aug 9 2011
   * Fix error prevent proper verification of dependents when using ArrayRef
     types. (bokutin)
   * Document verify method.
