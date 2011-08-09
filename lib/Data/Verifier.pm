@@ -539,7 +539,7 @@ sub verify {
         # check for dependents
         my $dependent = $fprof->{dependent};
         my $dep_results;
-        if($dependent) {
+        if($dependent and !$members) {
             # Create a new verifier for use with the dependents
             my $dep_verifier = Data::Verifier->new(
                 filters => $self->filters,
