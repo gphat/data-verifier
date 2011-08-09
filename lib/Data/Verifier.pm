@@ -365,6 +365,13 @@ sub coercion {
     );
 }
 
+=method verify (\%parameters)
+
+Call this method and provide the parameters you are checking.  The results
+will be provided to you as a L<Data::Verifier::Results> object.
+
+=cut
+
 sub verify {
     my ($self, $params, $members) = @_;
 
