@@ -1,6 +1,7 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Rely on MooseX::Storage::Engine to determine if we can serialize the type constraint, rather than a rather pessimistic type constraint on the field.
   * Fix error prevent proper verification of dependents when using ArrayRef
     types. (bokutin)
   * Document verify method.

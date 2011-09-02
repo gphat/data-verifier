@@ -60,4 +60,41 @@ use Moose::Util::TypeConstraints;
     cmp_ok($deresults->get_original_value('str'), '==', 2, 'got original value');
 }
 
+{
+    my $verifier = Data::Verifier->new(
+        profile => {
+            num => {
+                type   => 'Int',
+            },
+            silly_nesting => {
+                type => 'ArrayRef[HashRef[ArrayRef[Str]]]'
+            },
+        }
+    );
+
+    my $data = {
+        num => 2,
+        silly_nesting => [
+            { foo1 => [ 'bar1', 'baz1' ] },
+            { foo2 => [ 'bar2', 'baz2' ] },
+        ],
+    };
+
+    my $results = $verifier->verify($data);
+
+    ok($results->success, 'success');
+    cmp_ok($results->get_original_value('num'), 'eq', '2', 'get_original_value');
+    cmp_ok($results->get_value('num'), '==', 2, 'get_value(num) is 2');
+    is_deeply( $results->get_value('silly_nesting'), $data->{silly_nesting}, 'same nested structure' );
+
+    my $ser = $results->freeze({ format => 'JSON' });
+
+    my $deresults = Data::Verifier::Results->thaw($ser, { format => 'JSON' });
+
+    ok(!defined($deresults->get_value('num')), 'undefined value for num');
+    ok($deresults->get_original_value('num'), 'got original value');
+
+    is_deeply( $results->get_original_value('silly_nesting'), $data->{silly_nesting}, 'same nested structure from frozen structure' );
+}
+
 done_testing;

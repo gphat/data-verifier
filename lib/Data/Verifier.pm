@@ -20,7 +20,7 @@ use Try::Tiny;
             name => {
                 required    => 1,
                 type        => 'Str',
-               filters     => [ qw(collapse) ]
+                filters     => [ qw(collapse) ]
             },
             age  => {
                 type        => 'Int'
@@ -399,6 +399,16 @@ sub verify {
         # Creat the "field" that we'll put into the result.
         my $field = Data::Verifier::Field->new;
 
+        my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint($fprof->{type} || 'Str' );
+        unless ( defined($cons) ) {
+            die "Unknown type constraint on $key: '$fprof->{type}' (check type syntax?)" unless defined($cons);
+        }
+
+        my $handler = MooseX::Storage::Engine->find_type_handler($cons, $val);
+        unless ( defined($handler) ) {
+            die "Unable to handle $key: " . $cons->name . ", verify the constraint is serializable.";
+        }
+
         # Save the original value.
         if(ref($val) eq 'ARRAY') {
             my @values = @{ $val }; # Make a copy of the array
@@ -409,8 +419,6 @@ sub verify {
 
         # Early type check to catch parameterized ArrayRefs.
         if($fprof->{type}) {
-            my $cons = Moose::Util::TypeConstraints::find_or_parse_type_constraint($fprof->{type});
-
             die "Unknown type constraint '$fprof->{type}'" unless defined($cons);
 
             # If this type is a paramterized arrayref, then we'll handle each
