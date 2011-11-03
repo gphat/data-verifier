@@ -12,6 +12,7 @@ Collapses all consecutive whitespace into a single space
 
 sub collapse {
     my ($self, $val) = @_;
+    return $val if not defined $val;
 
     $val =~ s/\s+/ /g;
     return $val;
@@ -25,6 +26,7 @@ Removes B<all whitespace>.
 
 sub flatten {
     my ($self, $val) = @_;
+    return $val if not defined $val;
 
     $val =~ s/\s//g;
     return $val;
@@ -38,6 +40,7 @@ Converts the value to lowercase.
 
 sub lower {
     my ($self, $val) = @_;
+    return $val if not defined $val;
 
     return lc($val);
 }
@@ -50,6 +53,7 @@ Removes leading and trailing whitespace
 
 sub trim {
     my ($self, $val) = @_;
+    return $val if not defined $val;
 
     $val =~ s/^\s+|\s+$//g;
 
@@ -64,6 +68,7 @@ Converts the value to uppercase.
 
 sub upper {
     my ($self, $val) = @_;
+    return $val if not defined $val;
 
     return uc($val);
 }
