@@ -4,6 +4,7 @@ Revision history for Data-Verifier
   * Fix error prevent proper verification of dependents when using ArrayRef
     types. (bokutin)
   * Document verify method.
+  * Allow filters to be ran on undefined or unspecified parameters.
 
 0.49 Jul 9 2011
   * Fix missing Prereqs
