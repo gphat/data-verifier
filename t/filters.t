@@ -99,5 +99,30 @@ use Data::Verifier;
         qr/Unknown filter: foobazgorch/, 'unknown filter';
 }
 
+{
+    my $filter_run_count = 0;
+    my $bool_filter = sub { $filter_run_count++; $_[0] ? 1 : 0 };
+    my $verifier = Data::Verifier->new(
+        profile => {
+            bool => {
+                required => 1,
+                filters => [ $bool_filter ],
+            }
+        }
+    );
+
+    my $results = $verifier->verify({});
+
+    ok( defined $results->get_value('bool'), 'defined bool from filter' );
+    cmp_ok($results->get_value('bool'), '==', 0, 'correct bool from undef');
+
+    $results = $verifier->verify({ bool => 0 });
+    cmp_ok($results->get_value('bool'), '==', 0, 'correct bool');
+
+    $results = $verifier->verify({ bool => 'true' });
+    cmp_ok($results->get_value('bool'), '==', 1, 'correct true bool');
+
+    cmp_ok( $filter_run_count, '==', 3, 'ran filter correct times');
+}
 
 done_testing;

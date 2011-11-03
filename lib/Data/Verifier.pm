@@ -474,12 +474,12 @@ sub verify {
 
         unless($skip_string_checks) {
             # Pass through global filters
-            if($self->filters && defined $val) {
+            if($self->filters ) {
                 $val = $self->_filter_value($self->filters, $val);
             }
 
             # And now per-field ones
-            if($fprof->{filters} && defined $val) {
+            if($fprof->{filters} ) {
                 $val = $self->_filter_value($fprof->{filters}, $val);
             }
 
@@ -588,7 +588,7 @@ sub verify {
             my $field = $results->get_field($key);
 
             # Execute the post_check...
-            
+
             # If we are in member mode, use the member post check, else use
             # plain ol' post check.
             my $pc = $members ? $fprof->{member_post_check} : $fprof->{post_check};
