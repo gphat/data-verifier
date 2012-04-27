@@ -4,7 +4,7 @@ Data::Verifier - Profile based data verification with Moose type constraints.
 
 # VERSION
 
-version 0.47
+version 0.52
 
 # SYNOPSIS
 
@@ -169,7 +169,7 @@ Minimum then maximum length is checked.
 
 At this point the type will be checked after an optional coercion.
 
-- Depedency Checks
+- Dependency Checks
 
 If this field has dependents then those will not be processed.
 
@@ -177,7 +177,64 @@ If this field has dependents then those will not be processed.
 
 If the field has a post check it will now be executed.
 
+- Derived Fields
+
+Finally any derived fields are run.
+
 # ATTRIBUTES
+
+## derived
+
+An optional hashref of fields that will be derived from inspecting one or more
+fields in the profile.
+
+The keys for `derived` are as follows:
+
+- __required__
+
+Marks this derived field as required.  If the `deriver` returns undef then
+when this is true then the field, any source `fields` and (in turn) the entire
+profile will be invalid.
+
+- __fields__
+
+An optional arrayref that contains the names of any "source" fields that
+should be considered invalid if this field is determiend to be invalid.
+
+- __deriver__
+
+A subref that is passed a copy of the final results for the profile.  The
+return value of this subref will be used as the value for the field. A return
+value of undef will cause the field (and any source fields) to be makred
+invalid __if__ required is true.
+
+An example:
+
+    my $verifier = Data::Verifier->new(
+        profile => {
+            first_name => {
+                required => 1
+            },
+            last_name => {
+                required => 1
+            }
+        },
+        derived => {
+            'full_name' => {
+                required => 1,
+                fields => [qw(first_name last_name)],
+                deriver => sub {
+                    my $r = shift;
+                    return $r->get_value('first_name').' '.$r->get_value('last_name')
+                }
+            }
+        }
+    );
+
+In the above example a field named `full_name` will be created that is
+the other two fields concatenated.  If the derived field is required and 
+`deriver` subref returns undef then the derived field __and__ the fields
+listed in `fields` will also be invalid.
 
 ## filters
 
@@ -323,11 +380,18 @@ specific entity.
         }
     );
 
+## verify (\%parameters)
+
+Call this method and provide the parameters you are checking.  The results
+will be provided to you as a [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) object.
+
 # CONTRIBUTORS
 
 Mike Eldridge
 
 George Hartzell
+
+Tomohiro Hosaka
 
 Stevan Little
 
@@ -343,7 +407,7 @@ Cory G Watson <gphat@cpan.org>
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Cold Hard Code, LLC.
+This software is copyright (c) 2012 by Cold Hard Code, LLC.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
