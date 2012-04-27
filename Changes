@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * POD fixes
+  * Add derived fields
 
 0.51 Nov 3 2011
   * Fix error prevent proper verification of dependents when using ArrayRef
