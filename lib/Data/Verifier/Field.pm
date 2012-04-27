@@ -71,6 +71,10 @@ The post check failed.
 
 The value did not pass the type constraint.
 
+=item B<derived>
+
+The value failed because a value derived from it failed.
+
 =back
 
 =method has_reason

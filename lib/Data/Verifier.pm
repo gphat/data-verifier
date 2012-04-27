@@ -177,7 +177,7 @@ Minimum then maximum length is checked.
 
 At this point the type will be checked after an optional coercion.
 
-=item Depedency Checks
+=item Dependency Checks
 
 If this field has dependents then those will not be processed.
 
@@ -185,11 +185,80 @@ If this field has dependents then those will not be processed.
 
 If the field has a post check it will now be executed.
 
+=item Derived Fields
+
+Finally any derived fields are run.
+
 =back
 
 =end :prelude
 
 =cut
+
+=attr derived
+
+An optional hashref of fields that will be derived from inspecting one or more
+fields in the profile.
+
+The keys for C<derived> are as follows:
+
+=over 4
+
+=item B<required>
+
+Marks this derived field as required.  If the C<deriver> returns undef then
+when this is true then the field, any source C<fields> and (in turn) the entire
+profile will be invalid.
+
+=item B<fields>
+
+An optional arrayref that contains the names of any "source" fields that
+should be considered invalid if this field is determiend to be invalid.
+
+=item B<deriver>
+
+A subref that is passed a copy of the final results for the profile.  The
+return value of this subref will be used as the value for the field. A return
+value of undef will cause the field (and any source fields) to be makred
+invalid B<if> required is true.
+
+=back
+
+An example:
+
+    my $verifier = Data::Verifier->new(
+        profile => {
+            first_name => {
+                required => 1
+            },
+            last_name => {
+                required => 1
+            }
+        },
+        derived => {
+            'full_name' => {
+                required => 1,
+                fields => [qw(first_name last_name)],
+                deriver => sub {
+                    my $r = shift;
+                    return $r->get_value('first_name').' '.$r->get_value('last_name')
+                }
+            }
+        }
+    );
+
+In the above example a field named C<full_name> will be created that is
+the other two fields concatenated.  If the derived field is required and 
+C<deriver> subref returns undef then the derived field B<and> the fields
+listed in C<fields> will also be invalid.
+
+=cut
+
+has 'derived' => (
+    is => 'ro',
+    isa => 'HashRef[HashRef]',
+    predicate => 'has_derived'
+);
 
 =attr filters
 
@@ -606,6 +675,40 @@ sub verify {
                     $field->valid(0);
                 }
             }
+        }
+    }
+
+    if($self->has_derived) {
+        foreach my $key (keys(%{ $self->derived })) {
+            my $prof = $self->derived->{$key};
+            my $der = $prof->{deriver};
+            die "Derived fields must have a deriver!" unless defined($der);
+            my $rv = $results->$der();
+
+            my $req = $prof->{required};
+            
+            my $field = Data::Verifier::Field->new;
+            # If the field is required and we got back undef then this
+            # is a bad value!
+            if(defined($req) && $req && !defined($rv)) {
+                $field->valid(0);
+                
+                my $dfields = $prof->{fields};
+                foreach my $df (@{ $dfields }) {
+                    my $f = $results->get_field($df);
+                    die "Unknown field '$df' in derived field '$key'!" unless defined $f;
+                    $f->valid(0);
+                    $f->value(undef);
+                    $f->reason('derived');
+                }
+            } else {
+                # It's valid, set it to true and put the return value
+                # in.
+                $field->valid(1);
+                $field->value($rv);
+                $field->reason('derived');
+            }
+            $results->set_field($key, $field);
         }
     }
 
