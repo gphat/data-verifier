@@ -2,6 +2,8 @@ Revision history for Data-Verifier
 
 {{$NEXT}}
 
+0.52 Apr 27 2012
+
 0.51 Apr 27 2012
   * POD fixes
   * Add derived fields
