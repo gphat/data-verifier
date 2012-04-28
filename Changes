@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+
+0.53 Apr 28 2012
   * POD fix (John Anderson)
 
 0.52 Apr 27 2012
