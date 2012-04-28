@@ -179,7 +179,7 @@ At this point the type will be checked after an optional coercion.
 
 =item Dependency Checks
 
-If this field has dependents then those will not be processed.
+If this field has dependents then those will now be processed.
 
 =item Post Check
 
