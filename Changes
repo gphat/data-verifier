@@ -1,6 +1,8 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+
+0.54 Jul 5 2012
   * Add Data::Verifier::Nested (Stevan Little)
 
 0.53 Apr 28 2012
