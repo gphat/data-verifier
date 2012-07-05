@@ -1,6 +1,7 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Add Data::Verifier::Nested (Stevan Little)
 
 0.53 Apr 28 2012
   * POD fix (John Anderson)
