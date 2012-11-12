@@ -19,7 +19,7 @@ Predicate that returns true if this field has an original value.
 
 has original_value => (
     is => 'rw',
-    isa => 'Maybe[Str|ArrayRef|HashRef[Str]]',
+    isa => 'Maybe[Str|ArrayRef|HashRef]',
     predicate => 'has_original_value'
 );
 
@@ -36,7 +36,7 @@ Predicate that returns true if this field has a post filter value.
 
 has post_filter_value => (
     is => 'rw',
-    isa => 'Maybe[Str|ArrayRef|HashRef[Str]]',
+    isa => 'Maybe[Str|ArrayRef|HashRef]',
     predicate => 'has_post_filter_value'
 );
 

@@ -12,11 +12,16 @@ use Moose::Util::TypeConstraints;
             },
             age2    => {
                 type => 'Int',
-            }
+            },
+            deep_hash => { type => 'HashRef' },
         }
     );
 
-    my $results = $verifier->verify({ age => 'foo', age2 => '12' });
+    my $results = $verifier->verify({
+        age => 'foo',
+        age2 => '12',
+        deep_hash => { foo => { bar => { baz => 'buzz' } } },
+    });
 
     ok(!$results->success, 'failed');
     cmp_ok($results->invalid_count, '==', 1, '1 invalid');
