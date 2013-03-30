@@ -1,6 +1,7 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Extend types allowing deep hashref and not only hashref[str] (wreis)
 
 0.54 Jul 5 2012
   * Add Data::Verifier::Nested (Stevan Little)
