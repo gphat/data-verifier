@@ -340,7 +340,7 @@ serializing Result objects and using them to refill forms or something.
 =head1 INTERNALS
 
 This module has a hashref attribute C<fields>.  The keys are the names of the
-fields from the profile.  The keys are are either C<undef> or a
+fields from the profile.  The corresponding values are are either C<undef> or a
 L<Data::Verifier::Field> object.
 
 The B<only> keys that will be populated in the Result object are those that were

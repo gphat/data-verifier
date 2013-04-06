@@ -1,6 +1,7 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Doc fixes (Ron Savage)
 
 0.55 Mar 29 2013
   * Extend types allowing deep hashref and not only hashref[str] (wreis)
@@ -189,6 +190,6 @@ Revision history for Data-Verifier
 0.02
   - Honor global filters
 
-0.01    
+0.01
   - First version, released on an unsuspecting world.
 
