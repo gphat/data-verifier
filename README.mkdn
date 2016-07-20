@@ -4,7 +4,7 @@ Data::Verifier - Profile based data verification with Moose type constraints.
 
 # VERSION
 
-version 0.55
+version 0.57
 
 # SYNOPSIS
 
@@ -96,10 +96,10 @@ be included in the `values` attribute.  An example:
     $res->original_value('foos); # [ 1, 2, 30, 40 ] because it's all of them!
 
 It should also be noted that `post_check`s that are specified in the profile
-do __not__ get applied to the individual members, only to the entire, completed
+do **not** get applied to the individual members, only to the entire, completed
 field that they are constituents of.
 
-__Note__: Filters and such DO get applied to individual fields, so something
+**Note**: Filters and such DO get applied to individual fields, so something
 like:
 
     my $verifier = Data::Verifier->new(
@@ -112,7 +112,7 @@ like:
       }
     );
 
-In the above example, both `trim` and `collapse` __bill__ be applied to each
+In the above example, both `trim` and `collapse` **bill** be applied to each
 member of foos.
 
 ## Stops on First Failure
@@ -124,12 +124,12 @@ be checked against it's type constraint.
 
 ## Serialization
 
-Data::Verifier uses [MooseX::Storage](http://search.cpan.org/perldoc?MooseX::Storage) to allow serialization of
-[Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) objects.  You can use this to store results for
+Data::Verifier uses [MooseX::Storage](https://metacpan.org/pod/MooseX::Storage) to allow serialization of
+[Data::Verifier::Results](https://metacpan.org/pod/Data::Verifier::Results) objects.  You can use this to store results for
 validation across redirects.  Note, however, that the `value`
-attribute is __not__ serialized.  Since you can coerce a value into anything
+attribute is **not** serialized.  Since you can coerce a value into anything
 it is not reasonable to expect to be able to serialize it.  Have a look at
-the `original_value` or `post_filter_value` in [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results)
+the `original_value` or `post_filter_value` in [Data::Verifier::Results](https://metacpan.org/pod/Data::Verifier::Results)
 if you want to know more.
 
 ## Verifying Objects
@@ -190,23 +190,23 @@ fields in the profile.
 
 The keys for `derived` are as follows:
 
-- __required__
+- **required**
 
     Marks this derived field as required.  If the `deriver` returns undef then
     when this is true then the field, any source `fields` and (in turn) the entire
     profile will be invalid.
 
-- __fields__
+- **fields**
 
     An optional arrayref that contains the names of any "source" fields that
     should be considered invalid if this field is determiend to be invalid.
 
-- __deriver__
+- **deriver**
 
     A subref that is passed a copy of the final results for the profile.  The
     return value of this subref will be used as the value for the field. A return
     value of undef will cause the field (and any source fields) to be makred
-    invalid __if__ required is true.
+    invalid **if** required is true.
 
 An example:
 
@@ -233,12 +233,12 @@ An example:
 
 In the above example a field named `full_name` will be created that is
 the other two fields concatenated.  If the derived field is required and 
-`deriver` subref returns undef then the derived field __and__ the fields
+`deriver` subref returns undef then the derived field **and** the fields
 listed in `fields` will also be invalid.
 
 ## filters
 
-An optional arrayref of filter names through which __all__ values will be
+An optional arrayref of filter names through which **all** values will be
 passed.
 
 ## profile
@@ -247,17 +247,17 @@ The profile is a hashref.  Each value you'd like to verify is a key.  The
 values specify all the options to use with the field.  The available options
 are:
 
-- __coerce__
+- **coerce**
 
     If true then the value will be given an opportunity to coerce via Moose's
     type system.  If this is set, coercion will be ignored.
 
-- __coercion__
+- **coercion**
 
-    Set this attribute to the coercion defined for this type.  If __coerce__ is 
+    Set this attribute to the coercion defined for this type.  If **coerce** is 
     set this attribute will be ignored.  See the `coercion` method above.
 
-- __dependent__
+- **dependent**
 
     Allows a set of fields to be specifid as dependents of this one.  The argument
     for this key is a full-fledged profile as you would give to the profile key:
@@ -276,25 +276,25 @@ are:
 
     In the above example `password` is not required.  If it is provided then
     password2 must also be provided.  If any depedents of a field are missing or
-    invalid then that field is __invalid__.  In our example if password is provided
+    invalid then that field is **invalid**.  In our example if password is provided
     and password2 is missing then password will be invalid.
 
-- __filters__
+- **filters**
 
     An optional list of filters through which this specific value will be run. 
-    See the documentation for [Data::Verifier::Filters](http://search.cpan.org/perldoc?Data::Verifier::Filters) to learn more.  This
+    See the documentation for [Data::Verifier::Filters](https://metacpan.org/pod/Data::Verifier::Filters) to learn more.  This
     value my be either a scalar (string or coderef) or an arrayref of strings or
     coderefs.
 
-- __max\_length__
+- **max\_length**
 
     An optional length which the value may not exceed.
 
-- __min\_length__
+- **min\_length**
 
     An optional length which the value may not be less.
 
-- __member\_post\_check__
+- **member\_post\_check**
 
     A post check that is only to be applied to the members of an ArrayRef based
     type.  Because it is verified in something of a vacuum, the results object it
@@ -302,7 +302,7 @@ are:
     is only useful if you want to do some sort of weird post-check thing that I
     can't imagine would be a good idea.
 
-- __post\_check__
+- **post\_check**
 
     The `post_check` key takes a subref and, after all verification has finished,
     executes the subref with the results of the verification as it's only argument.
@@ -341,23 +341,23 @@ are:
     In this example you should rely on the `email` field, as `email2` carries no
     significance but to confirm `email`.
 
-    __Note about post\_check and exceptions__: If have a more complex post\_check
+    **Note about post\_check and exceptions**: If have a more complex post\_check
     that could fail in multiple ways, you can `die` in your post\_check coderef
     and the exception will be stored in the fields `reason` attribute.
 
-    __Note about post\_check and ArrayRef based types__: The post check is __not__
+    **Note about post\_check and ArrayRef based types**: The post check is **not**
     executed for ArrayRef based types.  See the note earlier in this documentation
     about ArrayRefs.
 
-- __required__
+- **required**
 
     Determines if this field is required for verification.
 
-- __type__
+- **type**
 
     The name of the Moose type constraint to use with verifying this field's
     value. Note, this will also accept an instance of
-    [Moose::Meta::TypeConstraint](http://search.cpan.org/perldoc?Moose::Meta::TypeConstraint), although it may not serialize properly as a
+    [Moose::Meta::TypeConstraint](https://metacpan.org/pod/Moose::Meta::TypeConstraint), although it may not serialize properly as a
     result.
 
 # METHODS
@@ -383,7 +383,7 @@ specific entity.
 ## verify (\\%parameters)
 
 Call this method and provide the parameters you are checking.  The results
-will be provided to you as a [Data::Verifier::Results](http://search.cpan.org/perldoc?Data::Verifier::Results) object.
+will be provided to you as a [Data::Verifier::Results](https://metacpan.org/pod/Data::Verifier::Results) object.
 
 # CONTRIBUTORS
 
@@ -397,9 +397,11 @@ Stevan Little
 
 Jason May
 
-Dennis Schön
+Dennis Sch�n
 
 J. Shirley
+
+Wallace Reis
 
 # AUTHOR
 
@@ -407,7 +409,7 @@ Cory G Watson <gphat@cpan.org>
 
 # COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Cold Hard Code, LLC.
+This software is copyright (c) 2016 by Cold Hard Code, LLC.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
