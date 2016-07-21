@@ -10,6 +10,7 @@ use Moose::Util::TypeConstraints;
 use Scalar::Util qw(blessed);
 use Try::Tiny;
 
+=encoding utf8
 =head1 SYNOPSIS
 
     use Data::Verifier;
@@ -100,7 +101,7 @@ be included in the C<values> attribute.  An example:
     $res->success; # This is false, as 1 and 2 did not pass
     $res->get_value('foos'); # [ 30, 40 ] because 30 and 40 passed!
     $res->original_value('foos); # [ 1, 2, 30, 40 ] because it's all of them!
-  
+
 It should also be noted that C<post_check>s that are specified in the profile
 do B<not> get applied to the individual members, only to the entire, completed
 field that they are constituents of.
@@ -117,7 +118,7 @@ like:
           }
       }
     );
-    
+
 In the above example, both C<trim> and C<collapse> B<bill> be applied to each
 member of foos.
 
@@ -248,7 +249,7 @@ An example:
     );
 
 In the above example a field named C<full_name> will be created that is
-the other two fields concatenated.  If the derived field is required and 
+the other two fields concatenated.  If the derived field is required and
 C<deriver> subref returns undef then the derived field B<and> the fields
 listed in C<fields> will also be invalid.
 
@@ -289,7 +290,7 @@ type system.  If this is set, coercion will be ignored.
 
 =item B<coercion>
 
-Set this attribute to the coercion defined for this type.  If B<coerce> is 
+Set this attribute to the coercion defined for this type.  If B<coerce> is
 set this attribute will be ignored.  See the C<coercion> method above.
 
 =item B<dependent>
@@ -316,7 +317,7 @@ and password2 is missing then password will be invalid.
 
 =item B<filters>
 
-An optional list of filters through which this specific value will be run. 
+An optional list of filters through which this specific value will be run.
 See the documentation for L<Data::Verifier::Filters> to learn more.  This
 value my be either a scalar (string or coderef) or an arrayref of strings or
 coderefs.
@@ -408,7 +409,7 @@ has 'profile' => (
 =method coercion
 
 Define a coercion to use for verification.  This will not define a global
-Moose type coercion, but is instead just a single coercion to apply to a 
+Moose type coercion, but is instead just a single coercion to apply to a
 specific entity.
 
     my $verifier = Data::Verifier->new(
@@ -416,7 +417,7 @@ specific entity.
             a_string => {
                 type     => 'Str',
                 coercion => Data::Verifier::coercion(
-                    from => 'Int', 
+                    from => 'Int',
                         via => sub { (qw[ one two three ])[ ($_ - 1) ] }
                 ),
             },
@@ -603,7 +604,7 @@ sub verify {
             elsif(my $coercion = $fprof->{coercion}) {
                 $val = $coercion->coerce($val);
             }
-    
+
             unless($cons->check($val)) {
                 $field->reason('type_constraint');
                 $field->valid(0);
@@ -686,13 +687,13 @@ sub verify {
             my $rv = $results->$der();
 
             my $req = $prof->{required};
-            
+
             my $field = Data::Verifier::Field->new;
             # If the field is required and we got back undef then this
             # is a bad value!
             if(defined($req) && $req && !defined($rv)) {
                 $field->valid(0);
-                
+
                 my $dfields = $prof->{fields};
                 foreach my $df (@{ $dfields }) {
                     my $f = $results->get_field($df);
@@ -771,5 +772,6 @@ J. Shirley
 
 Wallace Reis
 
-=end :postlude
+Mohammad S Anwar
 
+=end :postlude

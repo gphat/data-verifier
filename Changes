@@ -1,6 +1,9 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Fix pod syntax error as reported by CPANTS. (MANWAR)
+
+0.57 Jul 20 2016
   * Fixed CPAN Tester failed report. (MANWAR)
     http://www.cpantesters.org/cpan/report/51e66eb6-dace-11e3-a014-15d642028010
     http://www.cpantesters.org/cpan/report/fae7cb40-56ad-11e3-b060-7779323a7856
