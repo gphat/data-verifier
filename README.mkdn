@@ -4,46 +4,7 @@ Data::Verifier - Profile based data verification with Moose type constraints.
 
 # VERSION
 
-version 0.57
-
-# SYNOPSIS
-
-    use Data::Verifier;
-
-    my $dv = Data::Verifier->new(
-        filters => [ qw(trim) ],
-        profile => {
-            name => {
-                required    => 1,
-                type        => 'Str',
-               filters     => [ qw(collapse) ]
-            },
-            age  => {
-                type        => 'Int'
-            },
-            sign => {
-                required    => 1,
-                type        => 'Str'
-            }
-        }
-    );
-
-    # Pass in a hash of data
-    my $results = $dv->verify({
-        name => 'Cory', age => 'foobar'
-    });
-
-    $results->success; # no
-
-    $results->is_invalid('name'); # no
-    $results->is_invalid('age');  # yes
-
-    $results->is_missing('name'); # no
-    $results->is_missing('sign'); # yes
-
-    $results->get_original_value('name'); # Unchanged, original value
-    $results->get_value('name'); # Filtered, valid value
-    $results->get_value('age');  # undefined, as it's invalid
+version 0.58
 
 # DESCRIPTION
 
@@ -181,6 +142,45 @@ verification are performed:
 
     Finally any derived fields are run.
 
+# SYNOPSIS
+
+    use Data::Verifier;
+
+    my $dv = Data::Verifier->new(
+        filters => [ qw(trim) ],
+        profile => {
+            name => {
+                required    => 1,
+                type        => 'Str',
+               filters     => [ qw(collapse) ]
+            },
+            age  => {
+                type        => 'Int'
+            },
+            sign => {
+                required    => 1,
+                type        => 'Str'
+            }
+        }
+    );
+
+    # Pass in a hash of data
+    my $results = $dv->verify({
+        name => 'Cory', age => 'foobar'
+    });
+
+    $results->success; # no
+
+    $results->is_invalid('name'); # no
+    $results->is_invalid('age');  # yes
+
+    $results->is_missing('name'); # no
+    $results->is_missing('sign'); # yes
+
+    $results->get_original_value('name'); # Unchanged, original value
+    $results->get_value('name'); # Filtered, valid value
+    $results->get_value('age');  # undefined, as it's invalid
+
 # ATTRIBUTES
 
 ## derived
@@ -232,7 +232,7 @@ An example:
     );
 
 In the above example a field named `full_name` will be created that is
-the other two fields concatenated.  If the derived field is required and 
+the other two fields concatenated.  If the derived field is required and
 `deriver` subref returns undef then the derived field **and** the fields
 listed in `fields` will also be invalid.
 
@@ -254,7 +254,7 @@ are:
 
 - **coercion**
 
-    Set this attribute to the coercion defined for this type.  If **coerce** is 
+    Set this attribute to the coercion defined for this type.  If **coerce** is
     set this attribute will be ignored.  See the `coercion` method above.
 
 - **dependent**
@@ -281,7 +281,7 @@ are:
 
 - **filters**
 
-    An optional list of filters through which this specific value will be run. 
+    An optional list of filters through which this specific value will be run.
     See the documentation for [Data::Verifier::Filters](https://metacpan.org/pod/Data::Verifier::Filters) to learn more.  This
     value my be either a scalar (string or coderef) or an arrayref of strings or
     coderefs.
@@ -365,7 +365,7 @@ are:
 ## coercion
 
 Define a coercion to use for verification.  This will not define a global
-Moose type coercion, but is instead just a single coercion to apply to a 
+Moose type coercion, but is instead just a single coercion to apply to a
 specific entity.
 
     my $verifier = Data::Verifier->new(
@@ -373,7 +373,7 @@ specific entity.
             a_string => {
                 type     => 'Str',
                 coercion => Data::Verifier::coercion(
-                    from => 'Int', 
+                    from => 'Int',
                         via => sub { (qw[ one two three ])[ ($_ - 1) ] }
                 ),
             },
@@ -402,6 +402,8 @@ Dennis Sch�n
 J. Shirley
 
 Wallace Reis
+
+Mohammad S Anwar
 
 # AUTHOR
 

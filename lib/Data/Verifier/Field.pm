@@ -1,4 +1,5 @@
 package Data::Verifier::Field;
+
 use Moose;
 use MooseX::Storage;
 

@@ -1,6 +1,9 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Remove un-wanted noises like "no blank line for $VERSION after package". (MANWAR)
+
+0.58 Jul 21 2016
   * Fix pod syntax error as reported by CPANTS. (MANWAR)
 
 0.57 Jul 20 2016

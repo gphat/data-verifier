@@ -1,4 +1,5 @@
 package Data::Verifier::Nested;
+
 use Moose;
 
 # ABSTRACT: Nested profile based data verification with Moose type constraints.
@@ -150,6 +151,3 @@ __END__
 Stevan Little
 
 =end :postlude
-
-
-
