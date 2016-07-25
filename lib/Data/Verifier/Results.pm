@@ -1,4 +1,5 @@
 package Data::Verifier::Results;
+
 use Moose;
 use MooseX::Storage;
 

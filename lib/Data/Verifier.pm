@@ -1,4 +1,5 @@
 package Data::Verifier;
+
 use Moose;
 
 # ABSTRACT: Profile based data verification with Moose type constraints.
