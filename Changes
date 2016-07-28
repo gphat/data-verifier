@@ -1,6 +1,9 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Add minimum perl version using dzil plugin [MinimumPerl]. (MANWAR)
+
+0.59 Jul 25 2016
   * Remove un-wanted noises like "no blank line for $VERSION after package". (MANWAR)
 
 0.58 Jul 21 2016
