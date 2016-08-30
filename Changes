@@ -1,6 +1,9 @@
 Revision history for Data-Verifier
 
 {{$NEXT}}
+  * Merge pull request #14 from Manwar/fix-missing-build-prereqs
+
+0.60 Jul 28 2016
   * Add minimum perl version using dzil plugin [MinimumPerl]. (MANWAR)
 
 0.59 Jul 25 2016
